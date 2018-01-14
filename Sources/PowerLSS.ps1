@@ -123,7 +123,7 @@ Function Write-Log
   }
 
   #Handle writing in log file
-  if ($LogFile.IsPresent)
+  if ($LogFile)
   {
     Add-Content $Logfile $Message
   }
