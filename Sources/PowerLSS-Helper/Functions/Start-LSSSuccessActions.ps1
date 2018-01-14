@@ -1,4 +1,3 @@
 Function Start-LSSSuccessActions
 {
-  calc
 }
