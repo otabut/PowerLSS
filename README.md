@@ -1,9 +1,6 @@
 # PowerLSS
 Powershell Launch Startup Scripts
 
-## WORK IN PROGRESS
-Initial release coming very soon
-
 ## Description
 PowerLSS is made of a very simple idea : use the "Run on startup" feature of the Windows task scheduler.
 
