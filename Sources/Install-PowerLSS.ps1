@@ -1,21 +1,26 @@
 <#
 .SYNOPSIS
-	Script for installing PowerLSS scheduled task
+    Script for installing PowerLSS scheduled task
 
 .DESCRIPTION
 	
 .LINK
-	https://github.com/otabut/PowerLSS
+    https://github.com/otabut/PowerLSS
 
 .NOTES
     Author: Olivier TABUT
-	Version: 0.1.0 (14/01/2018)
+        Version: 0.1.0 (14/01/2018)
     ChangeLog: 
-       Initial version (14/01/2018)
+        Initial version (14/01/2018)
 	
-.EXAMPLE
-	./Install-PowerLSS.ps1
+.PARAMETER ForceCreate
+    Delete any previous scheduled task if exists
 
+.EXAMPLE
+    ./Install-PowerLSS.ps1
+
+.EXAMPLE
+    ./Install-PowerLSS.ps1 -ForceCreate
 #>
 
 Param (
