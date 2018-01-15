@@ -266,6 +266,7 @@ Try
         Write-Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Code : $ReturnCode"
         Write-Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Message : $ReturnMessage"
         Write-Log -Step "Process" -Status "Warning" -Comment "$ScriptBaseName processed with some warnings. Please check."
+	Start-LSSWarningActions
         Move-File -File $ScriptFullName -Target "$ScriptsPath\Done"
         Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
       }
