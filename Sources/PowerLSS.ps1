@@ -162,6 +162,7 @@ Function Move-File($File,$Target)
 
 ### MAIN SECTION ###
 
+#Import PowerLSS helper module
 Import-Module "$($PSScriptRoot)\PowerLSS-Helper\PowerLSS-Helper.psm1"
 
 $ErrorActionPreference = "stop"
