@@ -9,9 +9,10 @@
 
 .NOTES
     Author: Olivier TABUT
-        Version: 0.1.0 (14/01/2018)
+        Version: 0.2.0 (21/01/2018)
     ChangeLog: 
         Initial version (14/01/2018)
+	0.2.0 release (21/01/2018)
 
 .PARAMETER Retry
     Activate a retry if first attempt to run startup script failed
