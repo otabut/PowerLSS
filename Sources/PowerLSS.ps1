@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
-	Startup scripts Powershell management tool
+    Startup scripts Powershell management tool
 
 .DESCRIPTION
 	
 .LINK
-	https://github.com/otabut/PowerLSS
+    https://github.com/otabut/PowerLSS
 
 .NOTES
     Author: Olivier TABUT
-	Version: 0.1.0 (14/01/2018)
+        Version: 0.1.0 (14/01/2018)
     ChangeLog: 
-       Initial version (14/01/2018)
+        Initial version (14/01/2018)
 
 .PARAMETER Retry
 Activate a retry if first attempt to run startup script failed
@@ -59,14 +59,13 @@ Prevent pre actions from running
 Prevent post actions from running
 
 .EXAMPLE
-	Lanceur
+    Lanceur
 
 .EXAMPLE
-	Lanceur -Retry -Reboot -Include 'ps1' -InitialDelay 60 -ConsoleOutput
+    Lanceur -Retry -Reboot -Include 'ps1' -InitialDelay 60 -ConsoleOutput
 
 .EXAMPLE
-	Lanceur -Exclude 'bat' -InitialDelay 30 -DisableAtTheEnd -LogFile C:\TEMP\PowerLSS.log
-
+    Lanceur -Exclude 'bat' -InitialDelay 30 -DisableAtTheEnd -LogFile C:\TEMP\PowerLSS.log
 #>
 
   Param (
