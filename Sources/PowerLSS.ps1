@@ -16,7 +16,7 @@
 .PARAMETER Retry
 Activate a retry if first attempt to run startup script failed
 
-.PARAMETER Reboot
+.PARAMETER AllowReboot
 Allow reboot if requested by startup script
 
 .PARAMETER ContinueIfRebootRequest
@@ -71,7 +71,7 @@ Prevent post actions from running
 
   Param (
     [parameter(Mandatory=$false)][Switch]$Retry,
-    [parameter(Mandatory=$false)][Switch]$Reboot,
+    [parameter(Mandatory=$false)][Switch]$AllowReboot,
     [parameter(Mandatory=$false)][Switch]$ContinueIfRebootRequest,
     [parameter(Mandatory=$false)][Switch]$ContinueOnFailure,
     [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$Include,
@@ -238,10 +238,10 @@ Try
         #Test if a shutdown or a restart has been requested
         if ($RebootRequested)
         {
-          if ($Reboot.IsPresent)
+          if ($AllowReboot.IsPresent)
           {
             Write-Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested"
-            #Restart-Computer -Force
+            Restart-Computer -Force
             Break
           }
           else
