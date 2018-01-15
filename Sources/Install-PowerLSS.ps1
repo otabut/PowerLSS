@@ -17,15 +17,19 @@
 .PARAMETER ForceCreate
     Delete any previous scheduled task if exists
 
+.PARAMETER WithoutStarting
+    Prevent from starting PowerLSS scheduled task after initial installation
+
 .EXAMPLE
     ./Install-PowerLSS.ps1
 
 .EXAMPLE
-    ./Install-PowerLSS.ps1 -ForceCreate
+    ./Install-PowerLSS.ps1 -ForceCreate -WithoutStarting
 #>
 
 Param (
-    [parameter(Mandatory=$false)][Switch]$ForceCreate
+    [parameter(Mandatory=$false)][Switch]$ForceCreate,
+    [parameter(Mandatory=$false)][Switch]$WithoutStarting
   )
 
 
@@ -183,6 +187,11 @@ Try
     }
 
     #Start PowerLSS scheduled task
+    if ($WithoutStarting.IsPresent)
+    {
+      Write-Log -Step "Startup" -Status "Information" -Comment "WithoutStarting switch is present, so skipping startup"
+      $DoStart = $false
+    }
     if ($DoStart)
     {
       Write-Log -Step "Startup" -Status "Information" -Comment "Processing PowerLSS scheduled task startup"
