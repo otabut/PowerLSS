@@ -14,49 +14,49 @@
         Initial version (14/01/2018)
 
 .PARAMETER Retry
-Activate a retry if first attempt to run startup script failed
+    Activate a retry if first attempt to run startup script failed
 
 .PARAMETER AllowReboot
-Allow reboot if requested by startup script
+    Allow reboot if requested by startup script
 
 .PARAMETER ContinueIfRebootRequest
-Allow to continue running startup scripts if reboot has been requested but not allowed
+    Allow to continue running startup scripts if reboot has been requested but not allowed
 
 .PARAMETER ContinueOnFailure
-If a startup script fails, then continue
+    If a startup script fails, then continue
 
 .PARAMETER Include
-Explicitely define supported file extensions for startup scripts (comma separated)
+    Explicitely define supported file extensions for startup scripts (comma separated)
 
 .PARAMETER Exclude 
-Explicitely define unsupprted file extensions for startup scripts (comma separated)
+    Explicitely define unsupprted file extensions for startup scripts (comma separated)
 
 .PARAMETER InitialDelay
-Initial delay in seconds before start processing startup scripts
+    Initial delay in seconds before start processing startup scripts
 
 .PARAMETER DisableAtTheEnd
-Disable scheduled task when all startup scripts have been successfully processed
+    Disable scheduled task when all startup scripts have been successfully processed
 
 .PARAMETER ValidExitCodes
-List of valid exit codes from startup scripts (comma separated)
+    List of valid exit codes from startup scripts (comma separated)
 
 .PARAMETER LogFile
-Activate logging to a file and define path to the log file
+    Activate logging to a file and define path to the log file
 
 .PARAMETER ConsoleOutput
-Display logs in console
+    Display logs in console
 
 .PARAMETER Output
-Return logs as a Powershell object
+    Return logs as a Powershell object
 
 .PARAMETER CustomLogging
-Activate custom logging function (write to Event Logs, Syslog, Database, ...)
+    Activate custom logging function (write to Event Logs, Syslog, Database, ...)
 
 .PARAMETER DontRunPreActions
-Prevent pre actions from running
+    Prevent pre actions from running
 
 .PARAMETER DontRunPostActions
-Prevent post actions from running
+    Prevent post actions from running
 
 .EXAMPLE
     Lanceur
