@@ -187,7 +187,10 @@ Try
   }
 
   #Get the list of scripts to execute
-  $ScriptFile = Get-ChildItem $ScriptsPath -File | Sort Name | Select -first 1
+  $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
+  $ScriptCount = $ScriptList.Count
+  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount scripts to execute"
+  $ScriptFile = $ScriptList | Select -first 1
   
   while ($ScriptFile)
   {
