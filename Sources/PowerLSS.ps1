@@ -189,7 +189,7 @@ Try
   #Get the list of scripts to execute
   $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
   $ScriptCount = $ScriptList.Count
-  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount scripts to execute"
+  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount scripts to run"
   $ScriptFile = $ScriptList | Select -first 1
   
   while ($ScriptFile)
@@ -326,7 +326,10 @@ Try
     if (!($RebootRequested) -and (($ReturnStatus -ne "Failure") -or ($ContinueOnFailure.IsPresent)))
     {
       #Get next script to run
-      $ScriptFile = Get-ChildItem $ScriptsPath -File | sort Name | select -first 1
+      $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
+      $ScriptCount = $ScriptList.Count
+      Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) left to run"
+      $ScriptFile = $ScriptList | Select -first 1
     }
     elseif ($ProcessRetry)
     {
@@ -342,7 +345,7 @@ Try
   #Finalize if all scripts are in success
   if (!($RebootRequested) -and ($ReturnStatus -ne "Failure"))
   {
-    Write-Log -Step "Finalize" -Status "Information" -Comment "No more script to run"
+    Write-Log -Step "Finalize" -Status "Information" -Comment "No more script to run, ready to perform end-up tasks"
     #Launch function to handle actions to run when success
     Start-LSSSuccessActions
     #Disable scheduled task if requested
