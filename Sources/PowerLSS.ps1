@@ -187,6 +187,7 @@ Try
   }
 
   #Get the list of scripts to execute
+  $FirstRun = $true  #Boolean to prevent from computer restart loop
   $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
   $ScriptCount = $ScriptList.Count
   Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount scripts to run"
@@ -245,8 +246,16 @@ Try
           if ($AllowReboot.IsPresent)
           {
             Write-Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested"
-            Restart-Computer -Force
-            Break
+	    if ($FirstRun)
+	    {
+	      $RebootRequested = $False
+	      Write-Log -Step "Process" -Status "Warning" -Comment "Computer reboot has been requested but this is first startup script so reboot is skipped"
+	    }
+	    else
+	    {
+              Restart-Computer -Force
+              Break
+	    }
           }
           else
           {
@@ -326,6 +335,7 @@ Try
     if (!($RebootRequested) -and (($ReturnStatus -ne "Failure") -or ($ContinueOnFailure.IsPresent)))
     {
       #Get next script to run
+      $FirstRun = $false  #Boolean to prevent from computer restart loop
       $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
       $ScriptCount = $ScriptList.Count
       Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) left to run"
