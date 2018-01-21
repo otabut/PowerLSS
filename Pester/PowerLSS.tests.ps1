@@ -1,7 +1,7 @@
 
 # USAGE :
 # Invoke-Pester .\Install-PowerLSS.tests.ps1 -CodeCoverage @{Path = 'C:\Windows\Setup\Scripts\PowerLSS\PowerLSS.ps1'; StartLine = 163; EndLine = 374}
-# Covered 91,45 % of 117 analyzed commands in 1 file.
+# Covered 92,31 % of 117 analyzed commands in 1 file.
 
 
 $Path = "C:\Windows\Setup\Scripts\PowerLSS"
@@ -9,20 +9,6 @@ $LogFile = "$Path\PowerLSS.log"
 
 
 Describe "Test PowerLSS" {
-
-<#
-    [parameter(Mandatory=$false)][Switch]$AllowReboot,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$Include,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$Exclude,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$ValidExitCodes,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$LogFile,
-    [parameter(Mandatory=$false)][Switch]$ConsoleOutput,
-    [parameter(Mandatory=$false)][Switch]$Output,
-    [parameter(Mandatory=$false)][Switch]$CustomLogging,
-    [parameter(Mandatory=$false)][Switch]$DontRunPreActions,
-    [parameter(Mandatory=$false)][Switch]$DontRunPostActions
-#>
-
 
   Context "General" {
 
@@ -36,6 +22,18 @@ Describe "Test PowerLSS" {
       & "$Path\PowerLSS.ps1" -DisableAtTheEnd -LogFile "$LogFile"
       $Trace = Get-Content $LogFile
       ($Trace -match "Scheduled task has been disabled").count | should be 1
+    }
+
+    It "With -Include switch" {
+      & "$Path\PowerLSS.ps1" -Include "ps1" -LogFile "$LogFile"
+      $Trace = Get-Content $LogFile
+      ($Trace -match "Return Message : Ignored - file extension not supported").count | should be 0
+    }
+
+    It "With -Exclude switch" {
+      & "$Path\PowerLSS.ps1" -Exclude "ps1" -LogFile "$LogFile"
+      $Trace = Get-Content $LogFile
+      ($Trace -match "Return Message : Ignored - file extension not supported").count | should be 1
     }
 
     BeforeEach {
