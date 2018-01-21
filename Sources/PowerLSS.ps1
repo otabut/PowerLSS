@@ -361,7 +361,7 @@ Try
     #Disable scheduled task if requested
     if ($DisableAtTheEnd.IsPresent)
     {
-      SCHTASKS /CHANGE /DISABLE /TN Lanceur
+      SCHTASKS /CHANGE /DISABLE /TN PowerLSS
       Write-Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
     }
   }
