@@ -1,7 +1,7 @@
 
 # USAGE :
 # Invoke-Pester .\Install-PowerLSS.tests.ps1 -CodeCoverage @{Path = 'C:\Windows\Setup\Scripts\PowerLSS\PowerLSS.ps1'; StartLine = 163; EndLine = 374}
-# Covered 92,31 % of 117 analyzed commands in 1 file.
+# Covered 98,33 % of 120 analyzed commands in 1 file.
 
 
 $Path = "C:\Windows\Setup\Scripts\PowerLSS"
@@ -100,6 +100,12 @@ Describe "Test PowerLSS" {
       $Trace = Get-Content $LogFile
       ($Trace -match "Computer reboot has been requested but reboot not currently allowed").count | should be 1
       ($Trace -match "Allowed to continue despite reboot request").count | should be 1
+    }
+
+    It "With -AllowReboot switch (and prevent restart loop feature)" {
+      & "$Path\PowerLSS.ps1" -AllowReboot -LogFile "$LogFile"
+      $Trace = Get-Content $LogFile
+      ($Trace -match "Computer reboot has been requested but this is first startup script so reboot is skipped").count | should be 1
     }
 
     BeforeEach {
