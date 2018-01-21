@@ -10,3 +10,9 @@ Add - #6 Display somehow progression of Startup Scripts
 Add - #9 Add WithoutStarting swith to Install-PowerLSS.ps1
 
 Fix - #10 Prevent from computer restart loop
+
+
+## 0.3.0
+Add - #7 Support of configuration file instead of command-line parameters
+
+Add - #11 Complete refactory of Install-PowerLSS.ps1
