@@ -9,9 +9,10 @@
 
 .NOTES
     Author: Olivier TABUT
-        Version: 0.1.0 (14/01/2018)
+        Version: 0.2.0 (21/01/2018)
     ChangeLog: 
         Initial version (14/01/2018)
+        0.2.0 release (21/01/2018)
 
 .PARAMETER Retry
     Activate a retry if first attempt to run startup script failed
@@ -186,7 +187,11 @@ Try
   }
 
   #Get the list of scripts to execute
-  $ScriptFile = Get-ChildItem $ScriptsPath -File | Sort Name | Select -first 1
+  $FirstRun = $true  #Boolean to prevent from computer restart loop
+  $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
+  $ScriptCount = $ScriptList.Count
+  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount scripts to run"
+  $ScriptFile = $ScriptList | Select -first 1
   
   while ($ScriptFile)
   {
@@ -241,8 +246,16 @@ Try
           if ($AllowReboot.IsPresent)
           {
             Write-Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested"
-            Restart-Computer -Force
-            Break
+	    if ($FirstRun)
+	    {
+	      $RebootRequested = $False
+	      Write-Log -Step "Process" -Status "Warning" -Comment "Computer reboot has been requested but this is first startup script so reboot is skipped"
+	    }
+	    else
+	    {
+              Restart-Computer -Force
+              Break
+	    }
           }
           else
           {
@@ -322,7 +335,11 @@ Try
     if (!($RebootRequested) -and (($ReturnStatus -ne "Failure") -or ($ContinueOnFailure.IsPresent)))
     {
       #Get next script to run
-      $ScriptFile = Get-ChildItem $ScriptsPath -File | sort Name | select -first 1
+      $FirstRun = $false  #Boolean to prevent from computer restart loop
+      $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
+      $ScriptCount = $ScriptList.Count
+      Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) left to run"
+      $ScriptFile = $ScriptList | Select -first 1
     }
     elseif ($ProcessRetry)
     {
@@ -338,13 +355,13 @@ Try
   #Finalize if all scripts are in success
   if (!($RebootRequested) -and ($ReturnStatus -ne "Failure"))
   {
-    Write-Log -Step "Finalize" -Status "Information" -Comment "No more script to run"
+    Write-Log -Step "Finalize" -Status "Information" -Comment "No more script to run, ready to perform end-up tasks"
     #Launch function to handle actions to run when success
     Start-LSSSuccessActions
     #Disable scheduled task if requested
     if ($DisableAtTheEnd.IsPresent)
     {
-      SCHTASKS /CHANGE /DISABLE /TN Lanceur
+      SCHTASKS /CHANGE /DISABLE /TN PowerLSS
       Write-Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
     }
   }
