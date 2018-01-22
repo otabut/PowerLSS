@@ -10,7 +10,7 @@ $LogFile = "$Path\PowerLSS.log"
 
 Describe "Test PowerLSS" {
 
-  Context "General" {
+  Context "'General'" {
 
     It "With -InitialDelay switch" {
       & "$Path\PowerLSS.ps1" -InitialDelay 1 -LogFile "$LogFile"
@@ -46,7 +46,7 @@ Describe "Test PowerLSS" {
     }
   }
 
-  Context "Script that triggers failure" {
+  Context "'Script that triggers failure'" {
 
     It "No switches" {
       & "$Path\PowerLSS.ps1" -LogFile "$LogFile"
@@ -86,7 +86,7 @@ Describe "Test PowerLSS" {
     }
   }
 
-  Context "Script that triggers restart" {
+  Context "'Script that triggers restart'" {
 
     It "No switches" {
       & "$Path\PowerLSS.ps1" -LogFile "$LogFile"
@@ -118,7 +118,7 @@ Describe "Test PowerLSS" {
     }
   }
 
-  Context "Script with unsupported extension" {
+  Context "'Script with unsupported extension'" {
 
     It "No switches" {
       & "$Path\PowerLSS.ps1" -LogFile "$LogFile"
@@ -136,7 +136,7 @@ Describe "Test PowerLSS" {
     }
   }
 
-  Context "Script that return wrong status" {
+  Context "'Script that return wrong status'" {
 
     It "No switches" {
       & "$Path\PowerLSS.ps1" -LogFile "$LogFile"
