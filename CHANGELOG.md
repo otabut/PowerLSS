@@ -1,5 +1,5 @@
 ## 0.1.0
-Initial release (development still in progress)
+Initial release
 
 
 ## 0.2.0
