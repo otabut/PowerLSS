@@ -191,7 +191,7 @@ Try
   $FirstRun = $true  #Boolean to prevent from computer restart loop
   $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
   $ScriptCount = $ScriptList.Count
-  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount scripts to run"
+  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) to run"
   $ScriptFile = $ScriptList | Select -first 1
   
   while ($ScriptFile)
