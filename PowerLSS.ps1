@@ -89,109 +89,44 @@
   )
 
 
-### DECLARE FUNCTIONS ###
-
-Function Write-Log
-{
-  Param (
-    [parameter(Mandatory=$true)][String]$Step,
-    [parameter(Mandatory=$true)][ValidateSet("Information","Warning","Error")][String]$Status,
-    [parameter(Mandatory=$true)][String]$Comment
-  )
-
-  #Format message to log
-  $Date = Get-Date -format "dd/MM/yyyy HH:mm:ss.fff"
-  $Message = "$Date - $Hostname - $Step - $Status - $Comment"
-  
-  #Handle Console Output
-  if ($ConsoleOutput.IsPresent)
-  {
-    switch ($Status)
-    {
-      "Information"
-      { 
-        Write-Host $Message
-      }
-      "Warning"
-      { 
-        Write-Host $Message -ForegroundColor Yellow
-      }
-      "Error"
-      { 
-        Write-Host $Message -ForegroundColor Red
-      }
-    }
-  }
-
-  #Handle writing in log file
-  if ($LogFile)
-  {
-    Add-Content $Logfile $Message
-  }
-
-  #Handle returned PSCustomObject
-  if (($Output.IsPresent) -or ($CustomLogging.IsPresent))
-  {
-    $Line = [PSCustomObject]@{
-      Date = $Date
-      Hostname = $HostName
-      Step = $Step
-      Status = $Status
-      Comment = $Comment
-    }
-    $script:Log += $Line
-  }
-
-  #Handle custom logging function
-  if ($CustomLogging.IsPresent)
-  {
-    Start-LSSCustomLogging $Line
-  }
-}
-
-Function Move-File($File,$Target)
-{
-  #Test existence of folder and create it if missing
-  if (!(Test-Path -Path $Target))
-  {
-    New-Item -Path $Target -ItemType Directory | out-null
-  }
-  #Move script that has been processed
-  Move-Item $File $Target -Force
-}
-
-
 ### MAIN SECTION ###
-
-#Import PowerLSS helper module
-Import-Module "$($PSScriptRoot)\PowerLSS-Helper\PowerLSS-Helper.psm1"
 
 $ErrorActionPreference = "stop"
 Try
 {
-  #Variables
-  $Script:Log = @()
-  $Global:HostName = $env:computername
-  $Global:ScriptsPath = "$($PSScriptRoot)\PostInstall"
+  #Import PowerLSS helper module
+  Import-Module PowerLSS
   
-  Write-Log -Step "Initialize" -Status "Information" -Comment "Start of processing."
+  #Variables
+  $Global:Log = @()
+  $Script:ScriptsPath = "$($PSScriptRoot)\PostInstall"
+
+  #Redefine scope of parameters used by other cmdlets
+  $Global:LogFile = $LogFile
+  $Global:ConsoleOutput = $ConsoleOutput
+  $Global:Output = $Output
+  $Global:CustomLogging = $CustomLogging
+
+  #Initialize
+  Write-LSS_Log -Step "Initialize" -Status "Information" -Comment "Start of processing."
+  Write-LSS_Log -Step "General" -Status "Information" -Comment "Arguments : $($MyInvocation.BoundParameters.keys -join ',')"
   if ($InitialDelay)
   {
-    Write-Log -Step "Initialize" -Status "Information" -Comment "Waiting for $InitialDelay seconds before performing any actions..."
+    Write-LSS_Log -Step "Initialize" -Status "Information" -Comment "Waiting for $InitialDelay seconds before performing any actions..."
     Start-Sleep $InitialDelay
   }
   
   #Launch function to handle pre actions
   if (!($DontRunPreActions.IsPresent))
   {
-    Start-LSSPreActions
+    Start-LSS_PreActions
   }
 
   #Get the list of scripts to execute
   $FirstRun = $true  #Boolean to prevent from computer restart loop
   $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
   $ScriptCount = $ScriptList.Count
-  Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) to run"
+  Write-LSS_Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) to run"
   $ScriptFile = $ScriptList | Select -first 1
   
   while ($ScriptFile)
@@ -202,7 +137,7 @@ Try
     $ScriptExtension = $ScriptFile.Extension.Replace('.','').ToUpper()
     
     #Start script
-    Write-Log -Step "Process" -Status "Information" -Comment "Processing $ScriptBaseName"
+    Write-LSS_Log -Step "Process" -Status "Information" -Comment "Processing $ScriptBaseName"
 
     #Handle Include/Exclude
     $ToSkip = $False
@@ -215,9 +150,9 @@ Try
       $ToSkip = $True
     }
 
-    if (!($ToSkip) -and (Get-Command -Name Start-$ScriptExtension`Script -errorAction SilentlyContinue))
+    if (!($ToSkip) -and (Get-Command -Name Start-LSS_$ScriptExtension`Script -errorAction SilentlyContinue))
     {
-      $Result = & "Start-$ScriptExtension`Script" -Script "$ScriptFullName"
+      $Result = & "Start-LSS_$ScriptExtension`Script" -Script "$ScriptFullName"
       $ReturnCode = $Result.Code
       $ReturnStatus = $Result.Status
       $ReturnMessage = $Result.Message
@@ -235,40 +170,40 @@ Try
       "Success"  #If success, move script and process next one or exit
       {
         $ProcessRetry = $false
-        #Write-Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Status : $ReturnStatus"
-        #Write-Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Code : $ReturnCode"
-        Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName processed successfully"
-        Move-File -File $ScriptFullName -Target "$ScriptsPath\Done"
-        Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+        #Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Status : $ReturnStatus"
+        #Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Code : $ReturnCode"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName processed successfully"
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
 
         #Test if a shutdown or a restart has been requested
         if ($RebootRequested)
         {
           if ($AllowReboot.IsPresent)
           {
-            Write-Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested"
-	    if ($FirstRun)
-	    {
-	      $RebootRequested = $False
-	      Write-Log -Step "Process" -Status "Warning" -Comment "Computer reboot has been requested but this is first startup script so reboot is skipped"
-	    }
-	    else
-	    {
+            Write-LSS_Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested"
+	        if ($FirstRun)
+	        {
+	          $RebootRequested = $False
+	          Write-LSS_Log -Step "Process" -Status "Warning" -Comment "Computer reboot has been requested but this is first startup script so reboot is skipped"
+	        }
+	        else
+	        {
               Restart-Computer -Force
               Break
-	    }
+	        }
           }
           else
           {
-            Write-Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested but reboot not currently allowed"
+            Write-LSS_Log -Step "Process" -Status "Information" -Comment "Computer reboot has been requested but reboot not currently allowed"
             if ($ContinueIfRebootRequest.IsPresent)
             {
-              Write-Log -Step "Process" -Status "Information" -Comment "Allowed to continue despite reboot request"
+              Write-LSS_Log -Step "Process" -Status "Information" -Comment "Allowed to continue despite reboot request"
               $RebootRequested = $False
             }
             else
             {
-              Write-Log -Step "Process" -Status "Information" -Comment "Not allowed to continue because of reboot request. Stopping."
+              Write-LSS_Log -Step "Process" -Status "Information" -Comment "Not allowed to continue because of reboot request. Stopping."
             }
           }
         }
@@ -276,60 +211,60 @@ Try
       "Warning"
       {
         $ProcessRetry = $false
-        Write-Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Status : $ReturnStatus"
-        Write-Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Code : $ReturnCode"
-        Write-Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Message : $ReturnMessage"
-        Write-Log -Step "Process" -Status "Warning" -Comment "$ScriptBaseName processed with some warnings. Please check."
-	Start-LSSWarningActions
-        Move-File -File $ScriptFullName -Target "$ScriptsPath\Done"
-        Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Status : $ReturnStatus"
+        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Code : $ReturnCode"
+        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Message : $ReturnMessage"
+        Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptBaseName processed with some warnings. Please check."
+        Start-LSS_WarningActions
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
       }
       "Failure"
       {
-        Write-Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Status : $ReturnStatus"
-        Write-Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Code : $ReturnCode"
-        Write-Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Message : $ReturnMessage"
+        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Status : $ReturnStatus"
+        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Code : $ReturnCode"
+        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Message : $ReturnMessage"
 
         #Script failure, raise error and either make a retry or abort 
         if ($ProcessRetry)
         {
           $ProcessRetry = $false
-          Write-Log -Step "Process" -Status "Error" -Comment "$ScriptName has failed after 2 attempts. Please check error message."
+          Write-LSS_Log -Step "Process" -Status "Error" -Comment "$ScriptName has failed after 2 attempts. Please check error message."
           #Launch function to handle actions when failure
-          Start-LSSFailureActions
+          Start-LSS_FailureActions
           if ($ContinueOnFailure.IsPresent)
           {
-            Write-Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
-            Move-File -File $ScriptFullName -Target "$ScriptsPath\Done"
-            Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+            Write-LSS_Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
+            Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+            Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
           }
         }
         else
         {
           if ($Retry.IsPresent)
           {
-            Write-Log -Step "Process" -Status "Error" -Comment "$ScriptName has failed once, trying one more time"
+            Write-LSS_Log -Step "Process" -Status "Error" -Comment "$ScriptName has failed once, trying one more time"
             $ProcessRetry = $true
           }
           else
           {
-            Write-Log -Step "Process" -Status "Error" -Comment  "$ScriptName has failed, no retry. Please check error message."
+            Write-LSS_Log -Step "Process" -Status "Error" -Comment  "$ScriptName has failed, no retry. Please check error message."
             #Launch function to handle actions to run when failure
-            Start-LSSFailureActions
+            Start-LSS_FailureActions
             if ($ContinueOnFailure.IsPresent)
             {
-              Write-Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
-              Move-File -File $ScriptFullName -Target "$ScriptsPath\Done"
-              Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+              Write-LSS_Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
+              Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+              Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
             }
           }
         }
       }
       Default
       {
-        Write-Log -Step "Process" -Status "Warning" -Comment "$ScriptName provide unsupported return status : $ReturnStatus"
-        Move-File -File $ScriptFullName -Target "$ScriptsPath\Done"
-        Write-Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+        Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName provide unsupported return status : $ReturnStatus"
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
       }
     }
      
@@ -339,7 +274,7 @@ Try
       $FirstRun = $false  #Boolean to prevent from computer restart loop
       $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
       $ScriptCount = $ScriptList.Count
-      Write-Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) left to run"
+      Write-LSS_Log -Step "Process" -Status "Information" -Comment "Found $ScriptCount script(s) left to run"
       $ScriptFile = $ScriptList | Select -first 1
     }
     elseif ($ProcessRetry)
@@ -356,35 +291,35 @@ Try
   #Finalize if all scripts are in success
   if (!($RebootRequested) -and ($ReturnStatus -ne "Failure"))
   {
-    Write-Log -Step "Finalize" -Status "Information" -Comment "No more script to run, ready to perform end-up tasks"
+    Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "No more script to run, ready to perform end-up tasks"
     #Launch function to handle actions to run when success
-    Start-LSSSuccessActions
+    Start-LSS_SuccessActions
     #Disable scheduled task if requested
     if ($DisableAtTheEnd.IsPresent)
     {
-      SCHTASKS /CHANGE /DISABLE /TN PowerLSS
-      Write-Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
+      Disable-LSS_ScheduledTask
+      Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
     }
   }
   
   #Launch function to handle post actions
   if (!($DontRunPostActions.IsPresent))
   {
-    Start-LSSPostActions
+    Start-LSS_PostActions
   }
 
-  Write-Log -Step "Finalize" -Status "Information" -Comment "End of processing"
+  Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "End of processing"
 
   if ($Output.IsPresent)
   {
-    $script:Log | ft
+    $Global:Log | ft
   }
 }    
 Catch
 {
   $ErrorMessage = $_.Exception.Message
   $ErrorLine = $_.InvocationInfo.ScriptLineNumber
-  Write-Log -Step "Error Management" -Status "Error" -Comment "Error on line $ErrorLine. The error message was: $ErrorMessage"
-  Start-LSSFailureActions
+  Write-LSS_Log -Step "Error Management" -Status "Error" -Comment "Error on line $ErrorLine. The error message was: $ErrorMessage"
+  Start-LSS_FailureActions
 }
 
