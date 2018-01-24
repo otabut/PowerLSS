@@ -1,3 +1,0 @@
-Function Start-LSSSuccessActions
-{
-}
