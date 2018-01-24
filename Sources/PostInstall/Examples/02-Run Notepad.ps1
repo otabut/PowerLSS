@@ -1,6 +1,7 @@
+notepad
 [pscustomobject]@{
   Code = 0
-  Status = "Unsupported"
+  Status = "Success"
   Message = ""
   RebootRequested = $False
 }
