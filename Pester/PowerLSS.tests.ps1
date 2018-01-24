@@ -1,12 +1,7 @@
 
-# USAGE :
-# Invoke-Pester .\Install-PowerLSS.tests.ps1 -CodeCoverage @{Path = 'C:\Windows\Setup\Scripts\PowerLSS\PowerLSS.ps1'; StartLine = 163; EndLine = 374}
-# Covered 98,33 % of 120 analyzed commands in 1 file.
-
-
-$Path = "C:\Windows\Setup\Scripts\PowerLSS"
+Import-Module PowerLSS
+$Path = Split-Path((Get-Module PowerLSS).path)
 $LogFile = "$Path\PowerLSS.log"
-
 
 Describe "Test PowerLSS" {
 
@@ -37,12 +32,12 @@ Describe "Test PowerLSS" {
     }
 
     BeforeEach {
-      Copy-item "C:\Windows\Setup\Scripts\PowerLSS\PostInstall\Examples\02-Run Notepad.ps1" "C:\Windows\Setup\Scripts\PowerLSS\PostInstall"
+      Copy-item "$Path\PostInstall\Examples\02-Run Notepad.ps1" "$Path\PostInstall"
       Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
     }
 
     AfterEach {
-      Get-ChildItem -Path "C:\Windows\Setup\Scripts\PowerLSS\PostInstall" -File | Remove-Item -Force
+      Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
     }
   }
 
@@ -77,12 +72,12 @@ Describe "Test PowerLSS" {
     }
 
     BeforeEach {
-      Copy-item "C:\Windows\Setup\Scripts\PowerLSS\PostInstall\Examples\01-Trigger Failure.ps1" "C:\Windows\Setup\Scripts\PowerLSS\PostInstall"
+      Copy-item "$Path\PostInstall\Examples\01-Trigger Failure.ps1" "$Path\PostInstall"
       Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
     }
 
     AfterEach {
-      Get-ChildItem -Path "C:\Windows\Setup\Scripts\PowerLSS\PostInstall" -File | Remove-Item -Force
+      Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
     }
   }
 
@@ -109,12 +104,12 @@ Describe "Test PowerLSS" {
     }
 
     BeforeEach {
-      Copy-item "C:\Windows\Setup\Scripts\PowerLSS\PostInstall\Examples\03-Restart.ps1" "C:\Windows\Setup\Scripts\PowerLSS\PostInstall"
+      Copy-item "$Path\PostInstall\Examples\03-Restart.ps1" "$Path\PostInstall"
       Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
     }
 
     AfterEach {
-      Get-ChildItem -Path "C:\Windows\Setup\Scripts\PowerLSS\PostInstall" -File | Remove-Item -Force
+      Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
     }
   }
 
@@ -127,12 +122,12 @@ Describe "Test PowerLSS" {
     }
 
     BeforeEach {
-      Copy-item "C:\Windows\Setup\Scripts\PowerLSS\PostInstall\Examples\04-Unsupported extension.xyz" "C:\Windows\Setup\Scripts\PowerLSS\PostInstall"
+      Copy-item "$Path\PostInstall\Examples\04-Unsupported extension.xyz" "$Path\PostInstall"
       Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
     }
 
     AfterEach {
-      Get-ChildItem -Path "C:\Windows\Setup\Scripts\PowerLSS\PostInstall" -File | Remove-Item -Force
+      Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
     }
   }
 
@@ -145,12 +140,14 @@ Describe "Test PowerLSS" {
     }
 
     BeforeEach {
-      Copy-item "C:\Windows\Setup\Scripts\PowerLSS\PostInstall\Examples\05-Return wrong status.ps1" "C:\Windows\Setup\Scripts\PowerLSS\PostInstall"
+      Copy-item "$Path\PostInstall\Examples\05-Return wrong status.ps1" "$Path\PostInstall"
       Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
     }
 
     AfterEach {
-      Get-ChildItem -Path "C:\Windows\Setup\Scripts\PowerLSS\PostInstall" -File | Remove-Item -Force
+      Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
     }
   }
 }
+
+Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
