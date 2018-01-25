@@ -6,17 +6,6 @@ Function Install-PowerLSS
 
   .DESCRIPTION
 	
-  .LINK
-      https://github.com/otabut/PowerLSS
-
-  .NOTES
-      Author: Olivier TABUT
-          0.3.0 release (28/01/2018)
-      ChangeLog: 
-          Initial version (14/01/2018)
-          0.2.0 release (21/01/2018)
-          0.3.0 release (28/01/2018)
-
   .PARAMETER Force
       Delete any previous scheduled task if exists before creating it
 
