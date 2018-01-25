@@ -109,7 +109,7 @@ Function Install-PowerLSS
     {
       Write-LSS_Log -Step "Setup" -Status "Information" -Comment "Processing PowerLSS scheduled task setup"
       $Result = (Register-LSS_ScheduledTask).Result
-      Stop-LSS_ScheduledTask  ###### W2K8R2 ######
+      Stop-LSS_ScheduledTask  ###### needed because of known issue with W2K8R2 only ######
       $State = (Get-LSS_ScheduledTask).State
       if (($Result -eq 'Success') -and ($State -eq 'Ready'))
       {
