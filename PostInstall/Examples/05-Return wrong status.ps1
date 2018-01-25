@@ -3,4 +3,5 @@
   Status = "Unsupported"
   Message = ""
   RebootRequested = $False
+  RunOnce = $True
 }
