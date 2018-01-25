@@ -3,4 +3,5 @@
   Status = "Success"
   Message = ""
   RebootRequested = $True
+  RunOnce = $True
 }
