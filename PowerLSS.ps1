@@ -236,7 +236,7 @@ Try
           if ($ContinueOnFailure.IsPresent)
           {
             Write-LSS_Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
-            Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+            Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Failed"
             Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
           }
         }
@@ -255,7 +255,7 @@ Try
             if ($ContinueOnFailure.IsPresent)
             {
               Write-LSS_Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
-              Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+              Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Failed"
               Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
             }
           }
@@ -264,7 +264,7 @@ Try
       Default
       {
         Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName provide unsupported return status : $ReturnStatus"
-        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Skipped"
         Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
       }
     }
