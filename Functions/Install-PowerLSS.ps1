@@ -174,7 +174,7 @@ Function Install-PowerLSS
     if ($DoStart)
     {
       Write-LSS_Log -Step "Startup" -Status "Information" -Comment "Processing PowerLSS scheduled task startup"
-      $Command = Initialize-LSS_ScheduledTask
+      $Command = Start-LSS_ScheduledTask
       if ($Command.Result -eq 'Success')
       {
         Write-LSS_Log -Step "Startup" -Status "Information" -Comment "PowerLSS scheduled task started successfully"
