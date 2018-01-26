@@ -97,6 +97,7 @@ Function Get-LSS_Configuration
     $ScheduledTaskLogFile = "$Path\Functions\Install-PowerLSS.log"
     
     $RegPath = $RegBasePath + "\$ConfigurationName"
+    $CurrentConfiguration = ($ConfigurationName -eq (Get-ItemProperty -Path $RegBasePath)."CurrentConfiguration")
     if (Test-Path $RegPath -PathType Container)
     {
       Write-Host "Configuration $ConfigurationName was found" -ForegroundColor Green
@@ -106,37 +107,50 @@ Function Get-LSS_Configuration
         if ($Value)
         {
           Set-Variable $Parameter -Value $Value
-          #Write-Host "Value $Value found for $Parameter"
         }
         else
         {
           Write-Host "No value found for $Parameter, using default value" -ForegroundColor Yellow
         }
       }
+      $ReturnObject = $True
     }
     else
     {
-      Write-Host "Configuration $ConfigurationName is missing, using default values" -ForegroundColor Yellow
+      if ($CurrentConfiguration)
+      {
+        Write-Host "Configuration $ConfigurationName cannot be found but this is the current configuration so returning default values" -ForegroundColor Yellow
+        $ReturnObject = $True
+      }
+      else
+      {
+        Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow
+        $ReturnObject = $False
+      }
     }
   
-    [PSCustomObject]@{
-      "LogFile" = $LogFile
-      "InitialDelay" = [int]$InitialDelay
-      "Include" = $Include
-      "Exclude" = $Exclude
-      "ValidExitCodes" = $ValidExitCodes
-      "Retry" = @{$true="True";$false="False"}[$Retry -eq "True"]
-      "AllowReboot" = @{$true="True";$false="False"}[$AllowReboot -eq "True"]
-      "ContinueIfRebootRequest" = @{$true="True";$false="False"}[$ContinueIfRebootRequest -eq "True"]
-      "ContinueOnFailure" = @{$true="True";$false="False"}[$ContinueOnFailure -eq "True"]
-      "DisableAtTheEnd" = @{$true="True";$false="False"}[$DisableAtTheEnd -eq "True"]
-      "ConsoleOutput" = @{$true="True";$false="False"}[$ConsoleOutput -eq "True"]
-      "Output" = @{$true="True";$false="False"}[$Output -eq "True"]
-      "CustomLogging" = @{$true="True";$false="False"}[$CustomLogging -eq "True"]
-      "DontRunPreActions" = @{$true="True";$false="False"}[$DontRunPreActions -eq "True"]
-      "DontRunPostActions" = @{$true="True";$false="False"}[$DontRunPostActions -eq "True"]
-      "ScriptsFolder" = $ScriptsFolder
-      "ScheduledTaskLogFile" = $ScheduledTaskLogFile
+    if ($ReturnObject)
+    {
+      [PSCustomObject]@{
+        "ConfigurationName" = $ConfigurationName
+        "LogFile" = $LogFile
+        "InitialDelay" = [int]$InitialDelay
+        "Include" = $Include
+        "Exclude" = $Exclude
+        "ValidExitCodes" = $ValidExitCodes
+        "Retry" = @{$true="True";$false="False"}[$Retry -eq "True"]
+        "AllowReboot" = @{$true="True";$false="False"}[$AllowReboot -eq "True"]
+        "ContinueIfRebootRequest" = @{$true="True";$false="False"}[$ContinueIfRebootRequest -eq "True"]
+        "ContinueOnFailure" = @{$true="True";$false="False"}[$ContinueOnFailure -eq "True"]
+        "DisableAtTheEnd" = @{$true="True";$false="False"}[$DisableAtTheEnd -eq "True"]
+        "ConsoleOutput" = @{$true="True";$false="False"}[$ConsoleOutput -eq "True"]
+        "Output" = @{$true="True";$false="False"}[$Output -eq "True"]
+        "CustomLogging" = @{$true="True";$false="False"}[$CustomLogging -eq "True"]
+        "DontRunPreActions" = @{$true="True";$false="False"}[$DontRunPreActions -eq "True"]
+        "DontRunPostActions" = @{$true="True";$false="False"}[$DontRunPostActions -eq "True"]
+        "ScriptsFolder" = $ScriptsFolder
+        "ScheduledTaskLogFile" = $ScheduledTaskLogFile
+      }
     }
   }
 }
