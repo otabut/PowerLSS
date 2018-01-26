@@ -121,20 +121,20 @@ Function Get-LSS_Configuration
   
     [PSCustomObject]@{
       "LogFile" = $LogFile
-      "InitialDelay" = $InitialDelay
+      "InitialDelay" = [int]$InitialDelay
       "Include" = $Include
       "Exclude" = $Exclude
       "ValidExitCodes" = $ValidExitCodes
-      "Retry" = $Retry
-      "AllowReboot" = $AllowReboot
-      "ContinueIfRebootRequest" = $ContinueIfRebootRequest
-      "ContinueOnFailure" = $ContinueOnFailure
-      "DisableAtTheEnd" = $DisableAtTheEnd
-      "ConsoleOutput" = $ConsoleOutput
-      "Output" = $Output
-      "CustomLogging" = $CustomLogging
-      "DontRunPreActions" = $DontRunPreActions
-      "DontRunPostActions" = $DontRunPostActions
+      "Retry" = @{$true="True";$false="False"}[$Retry -eq "True"]
+      "AllowReboot" = @{$true="True";$false="False"}[$AllowReboot -eq "True"]
+      "ContinueIfRebootRequest" = @{$true="True";$false="False"}[$ContinueIfRebootRequest -eq "True"]
+      "ContinueOnFailure" = @{$true="True";$false="False"}[$ContinueOnFailure -eq "True"]
+      "DisableAtTheEnd" = @{$true="True";$false="False"}[$DisableAtTheEnd -eq "True"]
+      "ConsoleOutput" = @{$true="True";$false="False"}[$ConsoleOutput -eq "True"]
+      "Output" = @{$true="True";$false="False"}[$Output -eq "True"]
+      "CustomLogging" = @{$true="True";$false="False"}[$CustomLogging -eq "True"]
+      "DontRunPreActions" = @{$true="True";$false="False"}[$DontRunPreActions -eq "True"]
+      "DontRunPostActions" = @{$true="True";$false="False"}[$DontRunPostActions -eq "True"]
       "ScriptsFolder" = $ScriptsFolder
       "ScheduledTaskLogFile" = $ScheduledTaskLogFile
     }
