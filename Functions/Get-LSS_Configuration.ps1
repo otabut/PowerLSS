@@ -99,7 +99,7 @@ Function Get-LSS_Configuration
     $RegPath = $RegBasePath + "\$ConfigurationName"
     if (Test-Path $RegPath -PathType Container)
     {
-      Write-Host "Configuration $ConfigurationName was found"
+      Write-Host "Configuration $ConfigurationName was found" -ForegroundColor Green
       ForEach ($Parameter in $ParameterList)
       {
         $Value = (Get-ItemProperty -Path $RegPath)."$Parameter"
