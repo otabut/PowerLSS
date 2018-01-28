@@ -92,89 +92,98 @@ Function Get-LSS_Configuration
 
   ## MAIN
   
-  If (!(Get-module PowerLSS))
+  try
   {
-    Import-Module PowerLSS
-  }
-
-  #Variables
-  $Path = Split-Path((Get-Module PowerLSS).path)
-  $RegBasePath = "HKLM:\SOFTWARE\PowerLSS"
-  $ParameterList = @("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
-
-  if (!(Test-Path $RegBasePath -PathType Container))
-  {
-    New-Item -Path $RegBasePath | Out-Null
-  }
-
-  switch ($PsCmdlet.ParameterSetName)
-  { 
-    "Specific"
+    If (!(Get-module PowerLSS))
     {
-      Read-Config $ConfigurationName.split(',')
+      Import-Module PowerLSS
     }
-    "Current"
+
+    #Variables
+    $Path = Split-Path((Get-Module PowerLSS).path)
+    $RegBasePath = "HKLM:\SOFTWARE\PowerLSS"
+    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
+
+    if (!(Test-Path $RegBasePath -PathType Container))
     {
-      $CurrentConfiguration = (Get-ItemProperty -Path $RegBasePath)."CurrentConfiguration"
-      if (!($CurrentConfiguration))
+      New-Item -Path $RegBasePath | Out-Null
+    }
+
+    switch ($PsCmdlet.ParameterSetName)
+    { 
+      "Specific"
       {
-        Write-Host "No current configuration has been set, returning default values" -ForegroundColor Red
+        Read-Config $ConfigurationName.split(',')
+      }
+      "Current"
+      {
+        $CurrentConfiguration = (Get-ItemProperty -Path $RegBasePath)."CurrentConfiguration"
+        if (!($CurrentConfiguration))
+        {
+          Write-Host "No current configuration has been set, returning default values" -ForegroundColor Red
+  
+          #Define default values
+          $LogFile = "$Path\PowerLSS.log"
+          $InitialDelay = 60
+          $Include = "ps1"
+          $Exclude = ""
+          $ValidExitCodes = "0,3010"
+          $Retry = $false
+          $AllowReboot = $false
+          $ContinueIfRebootRequest = $false
+          $ContinueOnFailure = $false
+          $DisableAtTheEnd = $true
+          $ConsoleOutput = $false
+          $Output = $false
+          $CustomLogging = $true
+          $DontRunPreActions = $false
+          $DontRunPostActions = $false
+          $ScriptsFolder = "PostInstall"
+          $ScheduledTaskLogFile = "$Path\Functions\Install-PowerLSS.log"
 
-        #Define default values
-        $LogFile = "$Path\PowerLSS.log"
-        $InitialDelay = 60
-        $Include = "ps1"
-        $Exclude = ""
-        $ValidExitCodes = "0,3010"
-        $Retry = $false
-        $AllowReboot = $false
-        $ContinueIfRebootRequest = $false
-        $ContinueOnFailure = $false
-        $DisableAtTheEnd = $true
-        $ConsoleOutput = $false
-        $Output = $false
-        $CustomLogging = $true
-        $DontRunPreActions = $false
-        $DontRunPostActions = $false
-        $ScriptsFolder = "PostInstall"
-        $ScheduledTaskLogFile = "$Path\Functions\Install-PowerLSS.log"
-
-        [PSCustomObject]@{
-          "LogFile" = $LogFile
-          "InitialDelay" = $InitialDelay
-          "Include" = $Include
-          "Exclude" = $Exclude
-          "ValidExitCodes" = $ValidExitCodes
-          "Retry" = $Retry
-          "AllowReboot" = $AllowReboot
-          "ContinueIfRebootRequest" = $ContinueIfRebootRequest
-          "ContinueOnFailure" = $ContinueOnFailure
-          "DisableAtTheEnd" = $DisableAtTheEnd
-          "ConsoleOutput" = $ConsoleOutput
-          "Output" = $Output
-          "CustomLogging" = $CustomLogging
-          "DontRunPreActions" = $DontRunPreActions
-          "DontRunPostActions" = $DontRunPostActions
-          "ScriptsFolder" = $ScriptsFolder
-          "ScheduledTaskLogFile" = $ScheduledTaskLogFile
+          [PSCustomObject]@{
+            "LogFile" = $LogFile
+            "InitialDelay" = $InitialDelay
+            "Include" = $Include
+            "Exclude" = $Exclude
+            "ValidExitCodes" = $ValidExitCodes
+            "Retry" = $Retry
+            "AllowReboot" = $AllowReboot
+            "ContinueIfRebootRequest" = $ContinueIfRebootRequest
+            "ContinueOnFailure" = $ContinueOnFailure
+            "DisableAtTheEnd" = $DisableAtTheEnd
+            "ConsoleOutput" = $ConsoleOutput
+            "Output" = $Output
+            "CustomLogging" = $CustomLogging
+            "DontRunPreActions" = $DontRunPreActions
+            "DontRunPostActions" = $DontRunPostActions
+            "ScriptsFolder" = $ScriptsFolder
+            "ScheduledTaskLogFile" = $ScheduledTaskLogFile
+          }
+        }
+        else
+        {
+          Read-Config $CurrentConfiguration
         }
       }
-      else
+      "All"
       {
-        Read-Config $CurrentConfiguration
+        $AllConfigurations = (Get-ChildItem -Path $RegBasePath).PSChildName
+        if (!($AllConfigurations))
+        {
+          Write-Host "No configuration found" -ForegroundColor Yellow
+        }
+        else
+        {
+          Read-Config $AllConfigurations
+        }
       }
     }
-    "All"
-    {
-      $AllConfigurations = (Get-ChildItem -Path $RegBasePath).PSChildName
-      if (!($AllConfigurations))
-      {
-        Write-Host "No configuration found" -ForegroundColor Yellow
-      }
-      else
-      {
-        Read-Config $AllConfigurations
-      }
-    }
-  } 
+  }
+  catch
+  {
+    $ErrorMessage = $_.Exception.Message
+    $ErrorLine = $_.InvocationInfo.ScriptLineNumber
+    Write-Error -Step "Error Management" -Status "Error" -Comment "Error on line $ErrorLine. The error message was: $ErrorMessage"
+  }
 }
