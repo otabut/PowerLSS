@@ -92,6 +92,7 @@ Function Get-LSS_Configuration
 
   ## MAIN
   
+  $ErrorActionPreference = "stop"
   try
   {
     If (!(Get-module PowerLSS))
@@ -184,6 +185,6 @@ Function Get-LSS_Configuration
   {
     $ErrorMessage = $_.Exception.Message
     $ErrorLine = $_.InvocationInfo.ScriptLineNumber
-    Write-Error -Step "Error Management" -Status "Error" -Comment "Error on line $ErrorLine. The error message was: $ErrorMessage"
+    Write-Error "Error on line $ErrorLine. The error message was: $ErrorMessage"
   }
 }
