@@ -4,21 +4,30 @@ Function Set-LSS_CurrentConfiguration
     [parameter(Mandatory=$false)][String]$ConfigurationName
   )
   
-  If (!(Get-module PowerLSS))
+  try
   {
-    Import-Module PowerLSS
-  }
+    If (!(Get-module PowerLSS))
+    {
+      Import-Module PowerLSS
+    }
 
-  #Variables
-  $RegBasePath = "HKLM:\SOFTWARE\PowerLSS"
+    #Variables
+    $RegBasePath = "HKLM:\SOFTWARE\PowerLSS"
 
-  if (Test-Path "$RegBasePath\$ConfigurationName" -PathType Container)
-  {
-    New-ItemProperty -Path $RegBasePath -Name "CurrentConfiguration" -Value $ConfigurationName -PropertyType String -Force | Out-Null
-    Write-Host "Current configuration updated successfully" -ForegroundColor Green
+    if (Test-Path "$RegBasePath\$ConfigurationName" -PathType Container)
+    {
+      New-ItemProperty -Path $RegBasePath -Name "CurrentConfiguration" -Value $ConfigurationName -PropertyType String -Force | Out-Null
+      Write-Host "Current configuration updated successfully" -ForegroundColor Green
+    }
+    else
+    {
+      Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow
+    }
   }
-  else
+  catch
   {
-    Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow
+    $ErrorMessage = $_.Exception.Message
+    $ErrorLine = $_.InvocationInfo.ScriptLineNumber
+    Write-Error -Step "Error Management" -Status "Error" -Comment "Error on line $ErrorLine. The error message was: $ErrorMessage"
   }
 }
