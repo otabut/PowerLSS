@@ -5,6 +5,7 @@ Function Copy-LSS_Configuration
     [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Target
   )
   
+  $ErrorActionPreference = "stop"
   try
   {
     If (!(Get-module PowerLSS))
@@ -42,6 +43,6 @@ Function Copy-LSS_Configuration
   {
     $ErrorMessage = $_.Exception.Message
     $ErrorLine = $_.InvocationInfo.ScriptLineNumber
-    Write-Error -Step "Error Management" -Status "Error" -Comment "Error on line $ErrorLine. The error message was: $ErrorMessage"
+    Write-Error "Error on line $ErrorLine. The error message was: $ErrorMessage"
   }
 }
