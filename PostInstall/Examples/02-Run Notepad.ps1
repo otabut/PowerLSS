@@ -4,5 +4,4 @@ notepad
   Status = "Success"
   Message = ""
   RebootRequested = $False
-  RunOnce = $True
 }
