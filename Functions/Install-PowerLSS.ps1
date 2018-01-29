@@ -46,7 +46,10 @@ Function Install-PowerLSS
   Try
   {
     #Import PowerLSS helper module
-    Import-Module PowerLSS
+    If (!(Get-module PowerLSS))
+    {
+      Import-Module PowerLSS
+    }
 
     #Variables
     $Global:Log = @()
