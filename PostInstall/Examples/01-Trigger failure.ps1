@@ -3,5 +3,4 @@
   Status = "Failure"
   Message = "I want it to fail on purpose"
   RebootRequested = $False
-  RunOnce = $True
 }
