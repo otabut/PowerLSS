@@ -101,7 +101,7 @@
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DontRunPostActions,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ScriptsFolder='PostInstall',
     [parameter(Mandatory=$true,ParameterSetName="Specific")][ValidateNotNullOrEmpty()][String]$ConfigurationName,
-    [parameter(Mandatory=$false,ParameterSetName="Current")][Switch]$CurrentConfiguration
+    [parameter(Mandatory=$true,ParameterSetName="Current")][Switch]$CurrentConfiguration
   )
 
 
