@@ -64,17 +64,23 @@
 .PARAMETER ScriptsFolder
     Name of the folder where scripts are located. Must NOT be an absolute or relative path, must be just a folder name. Default is 'PostInstall' but allows to have multiple scripts sets.
 
-.EXAMPLE
-    Lanceur
+.PARAMETER ConfigurationName
+    Name of the predefined configuration to use
+    
+.PARAMETER CurrentConfiguration
+    Will use the configuration defined as current
 
 .EXAMPLE
-    Lanceur -Retry -Reboot -Include 'ps1' -InitialDelay 60 -ConsoleOutput
+    .\PowerLSS.ps1
 
 .EXAMPLE
-    Lanceur -Exclude 'bat' -InitialDelay 30 -DisableAtTheEnd -LogFile C:\TEMP\PowerLSS.log
+    .\PowerLSS.ps1 -Retry -Reboot -Include 'ps1' -InitialDelay 60 -ConsoleOutput
 
 .EXAMPLE
-    Lanceur -ConfigurationName 'Default'
+    .\PowerLSS.ps1 -Exclude 'bat' -InitialDelay 30 -DisableAtTheEnd -LogFile C:\TEMP\PowerLSS.log
+
+.EXAMPLE
+    .\PowerLSS.ps1 -ConfigurationName 'Default'
 #>
 
   Param (
@@ -94,7 +100,8 @@
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DontRunPreActions,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DontRunPostActions,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ScriptsFolder='PostInstall',
-    [parameter(Mandatory=$true,ParameterSetName="Configuration")][ValidateNotNullOrEmpty()][String]$ConfigurationName
+    [parameter(Mandatory=$true,ParameterSetName="Specific")][ValidateNotNullOrEmpty()][String]$ConfigurationName,
+    [parameter(Mandatory=$false,ParameterSetName="Current")][Switch]$CurrentConfiguration
   )
 
 
@@ -120,10 +127,32 @@ Try
       $Global:Output = $Output
       $Global:CustomLogging = $CustomLogging
     }
-    "Configuration"
+    "Specific"
     {
       #Retrieve configuration
       $Config = Get-LSS_Configuration -ConfigurationName $ConfigurationName
+      #Redefine scope of parameters used by other cmdlets
+      $Global:LogFile = $Config.LogFile
+      $Global:ConsoleOutput = $Config.ConsoleOutput
+      $Global:Output = $Config.Output
+      $Global:CustomLogging = $Config.CustomLogging
+      $Retry = $Config.Retry
+      $AllowReboot = $Config.AllowReboot
+      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
+      $ContinueOnFailure = $Config.ContinueOnFailure
+      $Include = $Config.Include
+      $Exclude = $Config.Exclude
+      $InitialDelay = $Config.InitialDelay
+      $DisableAtTheEnd = $Config.DisableAtTheEnd
+      $ValidExitCodes = $Config.ValidExitCodes
+      $DontRunPreActions = $Config.DontRunPreActions
+      $DontRunPostActions = $Config.DontRunPostActions
+      $ScriptsFolder = $Config.ScriptsFolder
+    }
+    "Current"
+    {
+      #Retrieve configuration
+      $Config = Get-LSS_Configuration -Current
       #Redefine scope of parameters used by other cmdlets
       $Global:LogFile = $Config.LogFile
       $Global:ConsoleOutput = $Config.ConsoleOutput
