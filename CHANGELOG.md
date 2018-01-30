@@ -23,4 +23,5 @@ Add - #7 Support of configuration file instead of command-line parameters
 
 Add - #15 Add set/get cmdlets for PowerLSS settings
 
+Add - #20 Support of configurations in Install-PowerLSS
 
