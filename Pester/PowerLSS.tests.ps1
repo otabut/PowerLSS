@@ -149,10 +149,17 @@ Describe "Test PowerLSS" {
     }
   }
 
-  Context "'With -ConfigurationName'" {
+  Context "'Configurations'" {
 
-    It "No switches" {
+    It "With -ConfigurationName switch" {
       & "$Path\PowerLSS.ps1" -ConfigurationName Test
+      $Trace = Get-Content $LogFile
+      ($Trace -match "Waiting for 1 seconds before performing any actions...").count | should be 1
+    }
+
+    It "With -CurrentConfiguration switch" {
+      Set-LSS_CurrentConfiguration -ConfigurationName Test
+      & "$Path\PowerLSS.ps1" -CurrentConfiguration
       $Trace = Get-Content $LogFile
       ($Trace -match "Waiting for 1 seconds before performing any actions...").count | should be 1
     }
