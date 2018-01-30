@@ -9,11 +9,12 @@
 
 .NOTES
     Author: Olivier TABUT
-        0.3.0 release (28/01/2018)
+        0.4.0 release (03/02/2018)
     ChangeLog: 
         Initial version (14/01/2018)
         0.2.0 release (21/01/2018)
 	0.3.0 release (28/01/2018)
+	0.4.0 release (03/02/2018)
 
 .PARAMETER Retry
     Activate a retry if first attempt to run startup script failed
@@ -60,32 +61,47 @@
 .PARAMETER DontRunPostActions
     Prevent post actions from running
 
-.EXAMPLE
-    Lanceur
+.PARAMETER ScriptsFolder
+    Name of the folder where scripts are located. Must NOT be an absolute or relative path, must be just a folder name. Default is 'PostInstall' but allows to have multiple scripts sets.
+
+.PARAMETER ConfigurationName
+    Name of the predefined configuration to use
+    
+.PARAMETER CurrentConfiguration
+    Will use the configuration defined as current
 
 .EXAMPLE
-    Lanceur -Retry -Reboot -Include 'ps1' -InitialDelay 60 -ConsoleOutput
+    .\PowerLSS.ps1
 
 .EXAMPLE
-    Lanceur -Exclude 'bat' -InitialDelay 30 -DisableAtTheEnd -LogFile C:\TEMP\PowerLSS.log
+    .\PowerLSS.ps1 -Retry -Reboot -Include 'ps1' -InitialDelay 60 -ConsoleOutput
+
+.EXAMPLE
+    .\PowerLSS.ps1 -Exclude 'bat' -InitialDelay 30 -DisableAtTheEnd -LogFile C:\TEMP\PowerLSS.log
+
+.EXAMPLE
+    .\PowerLSS.ps1 -ConfigurationName 'Default'
 #>
 
   Param (
-    [parameter(Mandatory=$false)][Switch]$Retry,
-    [parameter(Mandatory=$false)][Switch]$AllowReboot,
-    [parameter(Mandatory=$false)][Switch]$ContinueIfRebootRequest,
-    [parameter(Mandatory=$false)][Switch]$ContinueOnFailure,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$Include,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$Exclude,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][Int]$InitialDelay,
-    [parameter(Mandatory=$false)][Switch]$DisableAtTheEnd,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$ValidExitCodes,
-    [parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][String]$LogFile,
-    [parameter(Mandatory=$false)][Switch]$ConsoleOutput,
-    [parameter(Mandatory=$false)][Switch]$Output,
-    [parameter(Mandatory=$false)][Switch]$CustomLogging,
-    [parameter(Mandatory=$false)][Switch]$DontRunPreActions,
-    [parameter(Mandatory=$false)][Switch]$DontRunPostActions
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$Retry,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$AllowReboot,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ContinueIfRebootRequest,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ContinueOnFailure,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$Include,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$Exclude,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][Int]$InitialDelay,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DisableAtTheEnd,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ValidExitCodes,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$LogFile,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ConsoleOutput,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$Output,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$CustomLogging,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DontRunPreActions,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DontRunPostActions,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ScriptsFolder='PostInstall',
+    [parameter(Mandatory=$true,ParameterSetName="Specific")][ValidateNotNullOrEmpty()][String]$ConfigurationName,
+    [parameter(Mandatory=$true,ParameterSetName="Current")][Switch]$CurrentConfiguration
   )
 
 
@@ -95,17 +111,71 @@ $ErrorActionPreference = "stop"
 Try
 {
   #Import PowerLSS helper module
-  Import-Module PowerLSS
+  If (!(Get-module PowerLSS))
+  {
+    Import-Module PowerLSS
+  }
   
+  #Check on ParameterSet
+  switch ($PSCmdlet.ParameterSetName)
+  {
+    "Standard"
+    {
+      #Redefine scope of parameters used by other cmdlets
+      $Global:LogFile = $LogFile
+      $Global:ConsoleOutput = $ConsoleOutput
+      $Global:Output = $Output
+      $Global:CustomLogging = $CustomLogging
+    }
+    "Specific"
+    {
+      #Retrieve configuration
+      $Config = Get-LSS_Configuration -ConfigurationName $ConfigurationName
+      #Redefine scope of parameters used by other cmdlets
+      $Global:LogFile = $Config.LogFile
+      $Global:ConsoleOutput = $Config.ConsoleOutput
+      $Global:Output = $Config.Output
+      $Global:CustomLogging = $Config.CustomLogging
+      $Retry = $Config.Retry
+      $AllowReboot = $Config.AllowReboot
+      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
+      $ContinueOnFailure = $Config.ContinueOnFailure
+      $Include = $Config.Include
+      $Exclude = $Config.Exclude
+      $InitialDelay = $Config.InitialDelay
+      $DisableAtTheEnd = $Config.DisableAtTheEnd
+      $ValidExitCodes = $Config.ValidExitCodes
+      $DontRunPreActions = $Config.DontRunPreActions
+      $DontRunPostActions = $Config.DontRunPostActions
+      $ScriptsFolder = $Config.ScriptsFolder
+    }
+    "Current"
+    {
+      #Retrieve configuration
+      $Config = Get-LSS_Configuration -Current
+      #Redefine scope of parameters used by other cmdlets
+      $Global:LogFile = $Config.LogFile
+      $Global:ConsoleOutput = $Config.ConsoleOutput
+      $Global:Output = $Config.Output
+      $Global:CustomLogging = $Config.CustomLogging
+      $Retry = $Config.Retry
+      $AllowReboot = $Config.AllowReboot
+      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
+      $ContinueOnFailure = $Config.ContinueOnFailure
+      $Include = $Config.Include
+      $Exclude = $Config.Exclude
+      $InitialDelay = $Config.InitialDelay
+      $DisableAtTheEnd = $Config.DisableAtTheEnd
+      $ValidExitCodes = $Config.ValidExitCodes
+      $DontRunPreActions = $Config.DontRunPreActions
+      $DontRunPostActions = $Config.DontRunPostActions
+      $ScriptsFolder = $Config.ScriptsFolder
+    }
+  }
+
   #Variables
   $Global:Log = @()
-  $Script:ScriptsPath = "$($PSScriptRoot)\PostInstall"
-
-  #Redefine scope of parameters used by other cmdlets
-  $Global:LogFile = $LogFile
-  $Global:ConsoleOutput = $ConsoleOutput
-  $Global:Output = $Output
-  $Global:CustomLogging = $CustomLogging
+  $Script:ScriptsPath = "$($PSScriptRoot)\$ScriptsFolder"
 
   #Initialize
   Write-LSS_Log -Step "Initialize" -Status "Information" -Comment "Start of processing."
@@ -165,16 +235,19 @@ Try
       $ReturnMessage = "Ignored - file extension not supported"
     }
 
+    Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Status : $ReturnStatus"
+    Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Code : $ReturnCode"
+    Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Message : $ReturnMessage"
+    Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Reboot Requested ? $RebootRequested"
+
     switch ($ReturnStatus)
     {
       "Success"  #If success, move script and process next one or exit
       {
         $ProcessRetry = $false
-        #Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Status : $ReturnStatus"
-        #Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Code : $ReturnCode"
         Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName processed successfully"
         Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
-        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Done folder"
 
         #Test if a shutdown or a restart has been requested
         if ($RebootRequested)
@@ -211,20 +284,13 @@ Try
       "Warning"
       {
         $ProcessRetry = $false
-        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Status : $ReturnStatus"
-        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Code : $ReturnCode"
-        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Warning" -Comment "Return Message : $ReturnMessage"
         Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptBaseName processed with some warnings. Please check."
         Start-LSS_WarningActions
         Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
-        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Done folder"
       }
       "Failure"
       {
-        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Status : $ReturnStatus"
-        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Code : $ReturnCode"
-        Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Error" -Comment "Return Message : $ReturnMessage"
-
         #Script failure, raise error and either make a retry or abort 
         if ($ProcessRetry)
         {
@@ -235,8 +301,8 @@ Try
           if ($ContinueOnFailure.IsPresent)
           {
             Write-LSS_Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
-            Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
-            Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+            Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Failed"
+            Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Failed folder"
           }
         }
         else
@@ -254,8 +320,8 @@ Try
             if ($ContinueOnFailure.IsPresent)
             {
               Write-LSS_Log -Step "Process" -Status "Information" -Comment "Continue on failure is active, moving on"
-              Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
-              Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+              Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Failed"
+              Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Failed folder"
             }
           }
         }
@@ -263,8 +329,8 @@ Try
       Default
       {
         Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName provide unsupported return status : $ReturnStatus"
-        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Done"
-        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved"
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Skipped"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Skipped folder"
       }
     }
      

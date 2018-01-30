@@ -1,4 +1,4 @@
-Function Initialize-LSS_ScheduledTask
+Function Start-LSS_ScheduledTask
 {
   ### MAIN SECTION ###
 

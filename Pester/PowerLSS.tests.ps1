@@ -148,6 +148,34 @@ Describe "Test PowerLSS" {
       Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
     }
   }
+
+  Context "'Configurations'" {
+
+    It "With -ConfigurationName switch" {
+      & "$Path\PowerLSS.ps1" -ConfigurationName Test
+      $Trace = Get-Content $LogFile
+      ($Trace -match "Waiting for 1 seconds before performing any actions...").count | should be 1
+    }
+
+    It "With -CurrentConfiguration switch" {
+      Set-LSS_CurrentConfiguration -ConfigurationName Test
+      & "$Path\PowerLSS.ps1" -CurrentConfiguration
+      $Trace = Get-Content $LogFile
+      ($Trace -match "Waiting for 1 seconds before performing any actions...").count | should be 1
+    }
+
+    BeforeEach {
+      Function global:Write-Host() {}
+      Set-LSS_Configuration -ConfigurationName Test -Parameter InitialDelay -Value 1 | Out-Null
+      Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
+    }
+
+    AfterEach {
+      Remove-LSS_Configuration -ConfigurationName Test | Out-Null
+      Remove-Item -Path Function:\Write-Host
+      Get-ChildItem -Path "$Path\PostInstall" -File | Remove-Item -Force
+    }
+  }
 }
 
 Remove-Item $LogFile -Force -ErrorAction SilentlyContinue

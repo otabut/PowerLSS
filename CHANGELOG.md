@@ -16,3 +16,12 @@ Fix - #10 Prevent from computer restart loop
 Add - #11 Complete refactory of Install-PowerLSS.ps1
 
 Add - #13 Support Scheduled tasks for W2K8R2, W2K12, W2K12R2, W2K16
+
+
+## 0.4.0
+Add - #7 Support of configuration file instead of command-line parameters
+
+Add - #15 Add set/get cmdlets for PowerLSS settings
+
+Add - #20 Support of configurations in Install-PowerLSS
+
