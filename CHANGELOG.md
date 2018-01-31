@@ -34,6 +34,6 @@ Fix - #22 Bug in PowerLSS.ps1 with Get-LSS_Configuration (not detected by Pester
 
 Fix - #23 Enable scheduled task when trying to start it if disabled
 
-Add - #24 Add quiet switch for scheduled task and configuration management cmdlets
+Add - #24 Add quiet switch for configuration management cmdlets
 
 Add - #26 Move PreActions and Post Actions position
