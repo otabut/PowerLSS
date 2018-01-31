@@ -88,8 +88,8 @@
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$AllowReboot,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ContinueIfRebootRequest,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ContinueOnFailure,
-    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$Include,
-    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$Exclude,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNull()][String]$Include,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNull()][String]$Exclude,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][Int]$InitialDelay,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DisableAtTheEnd,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ValidExitCodes,
@@ -130,46 +130,46 @@ Try
     "Specific"
     {
       #Retrieve configuration
-      $Config = Get-LSS_Configuration -ConfigurationName $ConfigurationName
+      $Config = Get-LSS_Configuration -ConfigurationName $ConfigurationName -Quiet
       #Redefine scope of parameters used by other cmdlets
       $Global:LogFile = $Config.LogFile
-      $Global:ConsoleOutput = $Config.ConsoleOutput
-      $Global:Output = $Config.Output
-      $Global:CustomLogging = $Config.CustomLogging
-      $Retry = $Config.Retry
-      $AllowReboot = $Config.AllowReboot
-      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
-      $ContinueOnFailure = $Config.ContinueOnFailure
-      $Include = $Config.Include
-      $Exclude = $Config.Exclude
+      $Global:ConsoleOutput = ($Config.ConsoleOutput -eq "True")
+      $Global:Output = ($Config.Output -eq "True")
+      $Global:CustomLogging = ($Config.CustomLogging -eq "True")
+      $Retry = ($Config.Retry -eq "True")
+      $AllowReboot = ($Config.AllowReboot -eq "True")
+      $ContinueIfRebootRequest = ($Config.ContinueIfRebootRequest -eq "True")
+      $ContinueOnFailure = ($Config.ContinueOnFailure -eq "True")
+      $Include = "$($Config.Include)"
+      $Exclude = "$($Config.Exclude)"
       $InitialDelay = $Config.InitialDelay
-      $DisableAtTheEnd = $Config.DisableAtTheEnd
-      $ValidExitCodes = $Config.ValidExitCodes
-      $DontRunPreActions = $Config.DontRunPreActions
-      $DontRunPostActions = $Config.DontRunPostActions
-      $ScriptsFolder = $Config.ScriptsFolder
+      $DisableAtTheEnd = ($Config.DisableAtTheEnd -eq "True")
+      $ValidExitCodes = "$($Config.ValidExitCodes)"
+      $DontRunPreActions = ($Config.DontRunPreActions -eq "True")
+      $DontRunPostActions = ($Config.DontRunPostActions -eq "True")
+      $ScriptsFolder = "$($Config.ScriptsFolder)"
     }
     "Current"
     {
       #Retrieve configuration
-      $Config = Get-LSS_Configuration -Current
+      $Config = Get-LSS_Configuration -Current -Quiet
       #Redefine scope of parameters used by other cmdlets
       $Global:LogFile = $Config.LogFile
-      $Global:ConsoleOutput = $Config.ConsoleOutput
-      $Global:Output = $Config.Output
-      $Global:CustomLogging = $Config.CustomLogging
-      $Retry = $Config.Retry
-      $AllowReboot = $Config.AllowReboot
-      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
-      $ContinueOnFailure = $Config.ContinueOnFailure
-      $Include = $Config.Include
-      $Exclude = $Config.Exclude
+      $Global:ConsoleOutput = ($Config.ConsoleOutput -eq "True")
+      $Global:Output = ($Config.Output -eq "True")
+      $Global:CustomLogging = ($Config.CustomLogging -eq "True")
+      $Retry = ($Config.Retry -eq "True")
+      $AllowReboot = ($Config.AllowReboot -eq "True")
+      $ContinueIfRebootRequest = ($Config.ContinueIfRebootRequest -eq "True")
+      $ContinueOnFailure = ($Config.ContinueOnFailure -eq "True")
+      $Include = "$($Config.Include)"
+      $Exclude = "$($Config.Exclude)"
       $InitialDelay = $Config.InitialDelay
-      $DisableAtTheEnd = $Config.DisableAtTheEnd
-      $ValidExitCodes = $Config.ValidExitCodes
-      $DontRunPreActions = $Config.DontRunPreActions
-      $DontRunPostActions = $Config.DontRunPostActions
-      $ScriptsFolder = $Config.ScriptsFolder
+      $DisableAtTheEnd = ($Config.DisableAtTheEnd -eq "True")
+      $ValidExitCodes = "$($Config.ValidExitCodes)"
+      $DontRunPreActions = ($Config.DontRunPreActions -eq "True")
+      $DontRunPostActions = ($Config.DontRunPostActions -eq "True")
+      $ScriptsFolder = "$($Config.ScriptsFolder)"
     }
   }
 
@@ -231,8 +231,9 @@ Try
     else
     {
       $ReturnCode = "0"
-      $ReturnStatus = "Warning"
+      $ReturnStatus = "Skipped"
       $ReturnMessage = "Ignored - file extension not supported"
+      $RebootRequested = $False
     }
 
     Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Status : $ReturnStatus"
@@ -326,6 +327,12 @@ Try
           }
         }
       }
+      "Skipped"
+      {
+        Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName was skipped because of unsupported file extension"
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Skipped"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Skipped folder"
+      }
       Default
       {
         Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName provide unsupported return status : $ReturnStatus"
@@ -363,8 +370,14 @@ Try
     #Disable scheduled task if requested
     if ($DisableAtTheEnd.IsPresent)
     {
-      Disable-LSS_ScheduledTask
-      Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
+      if ((Disable-LSS_ScheduledTask).Result -eq "Success")
+      {
+        Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
+      }
+      else
+      {
+        Write-LSS_Log -Step "Finalize" -Status "Error" -Comment "Cannot disable scheduled task"
+      }
     }
   }
   
