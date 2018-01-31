@@ -4,7 +4,7 @@ Function Get-LSS_Configuration
     [parameter(Mandatory=$true,ParameterSetName='Specific')][ValidateNotNullOrEmpty()][String]$ConfigurationName,
     [parameter(Mandatory=$true,ParameterSetName='Current')][Switch]$Current,
     [parameter(Mandatory=$true,ParameterSetName='All')][Switch]$All,
-    [parameter(Mandatory=$true)][Switch]$Quiet
+    [parameter(Mandatory=$false)][Switch]$Quiet
   )
 
   ## FUNCTIONS
