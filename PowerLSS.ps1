@@ -9,12 +9,7 @@
 
 .NOTES
     Author: Olivier TABUT
-        0.4.0 release (03/02/2018)
-    ChangeLog: 
-        Initial version (14/01/2018)
-        0.2.0 release (21/01/2018)
-	0.3.0 release (28/01/2018)
-	0.4.0 release (03/02/2018)
+    0.5.0 release (03/02/2018)
 
 .PARAMETER Retry
     Activate a retry if first attempt to run startup script failed
@@ -177,6 +172,12 @@ Try
   $Global:Log = @()
   $Script:ScriptsPath = "$($PSScriptRoot)\$ScriptsFolder"
 
+  #Launch function to handle pre actions
+  if (!($DontRunPreActions.IsPresent))
+  {
+    Start-LSS_PreActions
+  }
+
   #Initialize
   Write-LSS_Log -Step "Initialize" -Status "Information" -Comment "Start of processing."
   Write-LSS_Log -Step "General" -Status "Information" -Comment "Arguments : $($MyInvocation.BoundParameters.keys -join ',')"
@@ -186,12 +187,6 @@ Try
     Start-Sleep $InitialDelay
   }
   
-  #Launch function to handle pre actions
-  if (!($DontRunPreActions.IsPresent))
-  {
-    Start-LSS_PreActions
-  }
-
   #Get the list of scripts to execute
   $FirstRun = $true  #Boolean to prevent from computer restart loop
   $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
@@ -381,13 +376,13 @@ Try
     }
   }
   
+  Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "End of processing"
+
   #Launch function to handle post actions
   if (!($DontRunPostActions.IsPresent))
   {
     Start-LSS_PostActions
   }
-
-  Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "End of processing"
 
   if ($Output.IsPresent)
   {
