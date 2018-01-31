@@ -25,3 +25,9 @@ Add - #15 Add set/get cmdlets for PowerLSS settings
 
 Add - #20 Support of configurations in Install-PowerLSS
 
+## 0.5.0
+Fix - #22 Bug in PowerLSS.ps1 with Get-LSS_Configuration (not detected by Pester validation script)
+
+Fix - #23 Enable scheduled task when trying to start it if disabled
+
+Add - #24 Add quiet switch for scheduled task management cmdlets
