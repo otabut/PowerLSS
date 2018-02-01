@@ -1,8 +1,7 @@
 Function Start-LSS_ScheduledTask
 {
   Param (
-    [parameter(Mandatory=$false)][Switch]$Force,
-    [parameter(Mandatory=$false)][Switch]$Quiet
+    [parameter(Mandatory=$false)][Switch]$Force
   )
   ### MAIN SECTION ###
 
@@ -28,10 +27,9 @@ Function Start-LSS_ScheduledTask
       $State = $States.Get_Item([string]($Task.State))
       If ($State -eq 'Disabled')
       {
-        if (!($Quiet.IsPresent)) { Write-Host "Scheduled task is disabled" -ForegroundColor Yellow }
         If ($Force.IsPresent)
         {
-          $void = Enable-LSS_ScheduledTask
+          Enable-LSS_ScheduledTask | Out-Null
           $Task = $TaskFolder.GetTask("PowerLSS")
           $State = $States.Get_Item([string]($Task.State))
         }
@@ -43,7 +41,6 @@ Function Start-LSS_ScheduledTask
       }
       else
       {
-        if (!($Quiet.IsPresent)) { Write-Host "Unable to start scheduled task" -ForegroundColor Red }
         $Result = "Error"
       }
     }
