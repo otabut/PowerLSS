@@ -20,7 +20,7 @@ Function Disable-LSS_ScheduledTask
 
     if ($Task)
     {
-      if ($Task.State -eq 3)
+      if (($Task.State -eq 3) -or ($Task.State -eq 4))
       {
         $Task.Enabled = $False
         $Result = "Success"
