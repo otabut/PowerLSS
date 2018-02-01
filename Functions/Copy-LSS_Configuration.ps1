@@ -22,8 +22,7 @@ Function Copy-LSS_Configuration
     {
       if ($Quiet.IsPresent)
       {
-        $Object = [PSCustomObject]@{ConfigurationName=$Source;Result="Not found"}
-        Return $Object
+        Return [PSCustomObject]@{ConfigurationName=$Source;Action="Copy";Result="Not found"}
       }
       else
       {
@@ -48,8 +47,7 @@ Function Copy-LSS_Configuration
 
     if ($Quiet.IsPresent)
     {
-      $Object = [PSCustomObject]@{ConfigurationName=$Target;Result="Success"}
-      Return $Object
+      Return [PSCustomObject]@{ConfigurationName=$Target;Action="Copy";Result="Success"}
     }
     else
     {
