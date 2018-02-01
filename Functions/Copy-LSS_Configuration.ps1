@@ -2,7 +2,8 @@ Function Copy-LSS_Configuration
 {
   Param (
     [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Source,
-    [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Target
+    [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Target,
+    [parameter(Mandatory=$false)][Switch]$Quiet
   )
   
   $ErrorActionPreference = "stop"
@@ -19,8 +20,16 @@ Function Copy-LSS_Configuration
 
     if (!(Test-Path $RegPathSource -PathType Container))
     {
-      Write-Host "Source configuration doesn't exist" -ForegroundColor Red
-      Return
+      if ($Quiet.IsPresent)
+      {
+        $Object = [PSCustomObject]@{ConfigurationName=$Source;Result="Not found"}
+        Return $Object
+      }
+      else
+      {
+        Write-Host "Source configuration doesn't exist" -ForegroundColor Red
+        Return
+      }
     }
 
     if (!(Test-Path $RegPathTarget -PathType Container))
@@ -37,7 +46,15 @@ Function Copy-LSS_Configuration
       }
     }
 
-    Write-Host "Configuration copied successfully" -ForegroundColor Green
+    if ($Quiet.IsPresent)
+    {
+      $Object = [PSCustomObject]@{ConfigurationName=$Target;Result="Success"}
+      Return $Object
+    }
+    else
+    {
+      Write-Host "Configuration copied successfully" -ForegroundColor Green
+    }
   }
   catch
   {
