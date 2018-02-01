@@ -1,7 +1,8 @@
 Function Remove-LSS_Configuration
 {
   Param (
-    [parameter(Mandatory=$true)][String]$ConfigurationName
+    [parameter(Mandatory=$true)][String]$ConfigurationName,
+    [parameter(Mandatory=$false)][Switch]$Quiet
   )
   
   $ErrorActionPreference = "stop"
@@ -23,16 +24,39 @@ Function Remove-LSS_Configuration
         if ($ConfigurationName -ne (Get-ItemProperty -Path $RegBasePath)."CurrentConfiguration")
         {
           Remove-Item -Path $RegPath -Force
-          Write-Host "Configuration $ConfigurationName has been removed successfully" -ForegroundColor Green
+          if ($Quiet.IsPresent)
+          {
+            Return [PSCustomObject]@{ConfigurationName=$ConfigurationName;Action="Remove";Result="Success"}
+          }
+          else
+          {
+            Write-Host "Configuration $ConfigurationName has been removed successfully" -ForegroundColor Green
+          }
         }
         else
         {
-          Write-Host "Configuration $ConfigurationName cannot be removed as it is the current configuration" -ForegroundColor Red
+          if ($Quiet.IsPresent)
+          {
+            $Object = [PSCustomObject]@{ConfigurationName=$ConfigurationName;Action="Remove";Result="Error"}
+            Return $Object
+          }
+          else
+          {
+            Write-Host "Configuration $ConfigurationName cannot be removed as it is the current configuration" -ForegroundColor Red
+          }
         }
       }
       else
       {
-        Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow
+        if ($Quiet.IsPresent)
+        {
+          $Object = [PSCustomObject]@{ConfigurationName=$ConfigurationName;Action="Remove";Result="Not found"}
+          Return $Object
+        }
+        else
+        {
+          Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow
+        }
       }
     }
   }
