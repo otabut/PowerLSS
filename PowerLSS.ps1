@@ -365,7 +365,7 @@ Try
     #Disable scheduled task if requested
     if ($DisableAtTheEnd.IsPresent)
     {
-      if ((Disable-LSS_ScheduledTask).Result -eq "Success")
+      if ((Disable-LSS_ScheduledTask).Result)
       {
         Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
       }
