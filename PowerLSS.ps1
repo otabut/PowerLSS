@@ -101,12 +101,13 @@
 $ErrorActionPreference = "stop"
 Try
 {
-  #Import PowerLSS helper module
+  #Import PowerLSS module
   If (!(Get-module PowerLSS))
   {
     Import-Module PowerLSS
   }
-  ForEach ($function in Get-ChildItem -Path "$($PSScriptRoot)\Helpers\*.ps1" -Recurse)
+  #Import PowerLSS helper functions
+  ForEach ($Function in Get-ChildItem -Path "$($PSScriptRoot)\Helpers\*.ps1" -Recurse)
   {
     . $Function.FullName
   }
