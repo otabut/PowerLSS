@@ -45,7 +45,7 @@ Function Install-PowerLSS
   $ErrorActionPreference = "stop"
   Try
   {
-    #Import PowerLSS helper module
+    #Import PowerLSS module
     If (!(Get-module PowerLSS))
     {
       Import-Module PowerLSS
