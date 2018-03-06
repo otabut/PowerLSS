@@ -14,7 +14,7 @@ Function Copy-LSS_Configuration
       Import-Module PowerLSS
     }
 
-    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
+    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
     $RegPathSource = "HKLM:\SOFTWARE\PowerLSS\$Source"
     $RegPathTarget = "HKLM:\SOFTWARE\PowerLSS\$Target"
 
