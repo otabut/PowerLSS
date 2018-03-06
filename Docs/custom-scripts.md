@@ -5,7 +5,9 @@ To handle specific script extensions, you must create your own routine that must
 
 Then, this custom routine must return a specially formated _PSCustomObject_ :
 
-    Code = <int>   # An integer that describe a return code. By convention, 0 should stand for no error.
-    Status = <string>  # A return status : valid values are Success, Warning, Failure
-    Message = <string>  # A free return message
-    RebootRequested = <boolean>  # A boolean that indicates if computer needs to be restarted or not
+    [PSCustomObject]@{
+      Code = <int>   # An integer that describe a return code. By convention, 0 should stand for no error.
+      Status = <string>  # A return status : valid values are Success, Warning, Failure
+      Message = <string>  # A free return message
+      RebootRequested = <boolean>  # A boolean that indicates if computer needs to be restarted or not
+    }
