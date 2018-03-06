@@ -35,9 +35,6 @@
 .PARAMETER DisableAtTheEnd
     Disable scheduled task when all startup scripts have been successfully processed
 
-.PARAMETER ValidExitCodes
-    List of valid exit codes from startup scripts (comma separated)
-
 .PARAMETER LogFile
     Activate logging to a file and define path to the log file
 
@@ -87,7 +84,6 @@
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNull()][String]$Exclude,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][Int]$InitialDelay,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DisableAtTheEnd,
-    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ValidExitCodes,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$LogFile,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ConsoleOutput,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$Output,
@@ -139,7 +135,6 @@ Try
       $Exclude = "$($Config.Exclude)"
       $InitialDelay = $Config.InitialDelay
       $DisableAtTheEnd = ($Config.DisableAtTheEnd -eq "True")
-      $ValidExitCodes = "$($Config.ValidExitCodes)"
       $DontRunPreActions = ($Config.DontRunPreActions -eq "True")
       $DontRunPostActions = ($Config.DontRunPostActions -eq "True")
       $ScriptsFolder = "$($Config.ScriptsFolder)"
@@ -161,7 +156,6 @@ Try
       $Exclude = "$($Config.Exclude)"
       $InitialDelay = $Config.InitialDelay
       $DisableAtTheEnd = ($Config.DisableAtTheEnd -eq "True")
-      $ValidExitCodes = "$($Config.ValidExitCodes)"
       $DontRunPreActions = ($Config.DontRunPreActions -eq "True")
       $DontRunPostActions = ($Config.DontRunPostActions -eq "True")
       $ScriptsFolder = "$($Config.ScriptsFolder)"
