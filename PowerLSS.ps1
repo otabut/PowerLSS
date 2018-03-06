@@ -107,7 +107,8 @@ Try
     Import-Module PowerLSS
   }
   #Import PowerLSS helper functions
-  ForEach ($Function in Get-ChildItem -Path "$($PSScriptRoot)\Helpers\*.ps1" -Recurse)
+  $Path = Split-Path((Get-Module PowerLSS).path)
+  ForEach ($Function in Get-ChildItem -Path "$Path\Helpers\*.ps1" -Recurse)
   {
     . $Function.FullName
   }
