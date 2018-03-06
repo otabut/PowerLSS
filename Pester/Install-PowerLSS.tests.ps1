@@ -1,6 +1,6 @@
 Import-Module PowerLSS
 $Path = Split-Path((Get-Module PowerLSS).path)
-$LogFile = "$Path\Functions\Install-PowerLSS.log"
+$LogFile = "$Path\Install-PowerLSS.log"
 
 Describe "Test Install-PowerLSS" {
 

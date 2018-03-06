@@ -5,8 +5,17 @@ Function Uninstall-PowerLSS
   $ErrorActionPreference = "stop"
   Try
   {
-    #Import PowerLSS helper module
-    Import-Module PowerLSS
+    #Import PowerLSS module
+    If (!(Get-module PowerLSS))
+    {
+      Import-Module PowerLSS
+    }
+    #Import PowerLSS helper functions
+    $Path = Split-Path((Get-Module PowerLSS).path)
+    ForEach ($Function in Get-ChildItem -Path "$Path\Helpers\*.ps1" -Recurse)
+    {
+      . $Function.FullName
+    }
 
     #Variables
     $Script:LogFile = "$($PSScriptRoot)\Install-PowerLSS.log"

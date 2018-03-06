@@ -1,5 +1,8 @@
 Function Start-LSS_ScheduledTask
 {
+  Param (
+    [parameter(Mandatory=$false)][Switch]$Force
+  )
   ### MAIN SECTION ###
 
   $ErrorActionPreference = "stop"
@@ -20,8 +23,26 @@ Function Start-LSS_ScheduledTask
   
     if ($Task)
     {
-      $Task.Run($null) | Out-Null
-      $Result = "Success"
+      $States = @{"0"="Unknown";"1"="Disabled";"2"="Queued";"3"="Ready";"4"="Running"}
+      $State = $States.Get_Item([string]($Task.State))
+      If ($State -eq 'Disabled')
+      {
+        If ($Force.IsPresent)
+        {
+          Enable-LSS_ScheduledTask | Out-Null
+          $Task = $TaskFolder.GetTask("PowerLSS")
+          $State = $States.Get_Item([string]($Task.State))
+        }
+      }
+      If ($State -eq 'Ready')
+      {
+        $Task.Run($null) | Out-Null
+        $Result = "Success"
+      }
+      else
+      {
+        $Result = "Error"
+      }
     }
     else
     {

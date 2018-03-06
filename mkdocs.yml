@@ -1,0 +1,14 @@
+
+site_name: PowerLSS
+site_url: https://github.com/otabut/PowerLSS
+site_description: Powershell Launch Startup Scripts
+site_author: otabut
+repo_url: https://github.com/otabut/PowerLSS
+
+pages:
+  - Home: index.md
+  - PowerLSS setup: setup.md
+  - Running PowerLSS: running.md
+  - Custom scripts: custom-scripts.md
+  - PowerLSS parameters: parameters.md
+  - Cmdlets reference: cmdlets-reference.md

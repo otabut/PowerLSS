@@ -3,7 +3,8 @@ Function Get-LSS_Configuration
   Param (
     [parameter(Mandatory=$true,ParameterSetName='Specific')][ValidateNotNullOrEmpty()][String]$ConfigurationName,
     [parameter(Mandatory=$true,ParameterSetName='Current')][Switch]$Current,
-    [parameter(Mandatory=$true,ParameterSetName='All')][Switch]$All
+    [parameter(Mandatory=$true,ParameterSetName='All')][Switch]$All,
+    [parameter(Mandatory=$false)][Switch]$Quiet
   )
 
   ## FUNCTIONS
@@ -17,17 +18,16 @@ Function Get-LSS_Configuration
       $InitialDelay = 60
       $Include = "ps1"
       $Exclude = ""
-      $ValidExitCodes = "0,3010"
-      $Retry = $false
-      $AllowReboot = $false
-      $ContinueIfRebootRequest = $false
-      $ContinueOnFailure = $false
-      $DisableAtTheEnd = $true
-      $ConsoleOutput = $false
-      $Output = $false
-      $CustomLogging = $true
-      $DontRunPreActions = $false
-      $DontRunPostActions = $false
+      $Retry = "False"
+      $AllowReboot = "False"
+      $ContinueIfRebootRequest = "False"
+      $ContinueOnFailure = "False"
+      $DisableAtTheEnd = "True"
+      $ConsoleOutput = "False"
+      $Output = "False"
+      $CustomLogging = "True"
+      $DontRunPreActions = "False"
+      $DontRunPostActions = "False"
       $ScriptsFolder = "PostInstall"
       $ScheduledTaskLogFile = "$Path\Functions\Install-PowerLSS.log"
     
@@ -35,7 +35,7 @@ Function Get-LSS_Configuration
       $CurrentConfiguration = ($ConfigurationName -eq (Get-ItemProperty -Path $RegBasePath)."CurrentConfiguration")
       if (Test-Path $RegPath -PathType Container)
       {
-        Write-Host "Configuration $ConfigurationName was found" -ForegroundColor Green
+        if (!($Quiet.IsPresent)) { Write-Host "Configuration $ConfigurationName was found" -ForegroundColor Green }
         ForEach ($Parameter in $ParameterList)
         {
           $Value = (Get-ItemProperty -Path $RegPath)."$Parameter"
@@ -45,7 +45,7 @@ Function Get-LSS_Configuration
           }
           else
           {
-            Write-Host "No value found for $Parameter, using default value" -ForegroundColor Yellow
+            if (!($Quiet.IsPresent)) { Write-Host "No value found for $Parameter, using default value" -ForegroundColor Yellow }
           }
         }
         $ReturnObject = $True
@@ -54,12 +54,12 @@ Function Get-LSS_Configuration
       {
         if ($CurrentConfiguration)
         {
-          Write-Host "Configuration $ConfigurationName cannot be found but this is the current configuration so returning default values" -ForegroundColor Yellow
+          if (!($Quiet.IsPresent)) { Write-Host "Configuration $ConfigurationName cannot be found but this is the current configuration so returning default values" -ForegroundColor Yellow }
           $ReturnObject = $True
         }
         else
         {
-          Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow
+          if (!($Quiet.IsPresent)) { Write-Host "Configuration $ConfigurationName cannot be found" -ForegroundColor Yellow }
           $ReturnObject = $False
         }
       }
@@ -72,17 +72,16 @@ Function Get-LSS_Configuration
           "InitialDelay" = [int]$InitialDelay
           "Include" = $Include
           "Exclude" = $Exclude
-          "ValidExitCodes" = $ValidExitCodes
-          "Retry" = @{$true="True";$false="False"}[$Retry -eq "True"]
-          "AllowReboot" = @{$true="True";$false="False"}[$AllowReboot -eq "True"]
-          "ContinueIfRebootRequest" = @{$true="True";$false="False"}[$ContinueIfRebootRequest -eq "True"]
-          "ContinueOnFailure" = @{$true="True";$false="False"}[$ContinueOnFailure -eq "True"]
-          "DisableAtTheEnd" = @{$true="True";$false="False"}[$DisableAtTheEnd -eq "True"]
-          "ConsoleOutput" = @{$true="True";$false="False"}[$ConsoleOutput -eq "True"]
-          "Output" = @{$true="True";$false="False"}[$Output -eq "True"]
-          "CustomLogging" = @{$true="True";$false="False"}[$CustomLogging -eq "True"]
-          "DontRunPreActions" = @{$true="True";$false="False"}[$DontRunPreActions -eq "True"]
-          "DontRunPostActions" = @{$true="True";$false="False"}[$DontRunPostActions -eq "True"]
+          "Retry" = ($Retry -eq "True")
+          "AllowReboot" = ($AllowReboot -eq "True")
+          "ContinueIfRebootRequest" = ($ContinueIfRebootRequest -eq "True")
+          "ContinueOnFailure" = ($ContinueOnFailure -eq "True")
+          "DisableAtTheEnd" = ($DisableAtTheEnd -eq "True")
+          "ConsoleOutput" = ($ConsoleOutput -eq "True")
+          "Output" = ($Output -eq "True")
+          "CustomLogging" = ($CustomLogging -eq "True")
+          "DontRunPreActions" = ($DontRunPreActions -eq "True")
+          "DontRunPostActions" = ($DontRunPostActions -eq "True")
           "ScriptsFolder" = $ScriptsFolder
           "ScheduledTaskLogFile" = $ScheduledTaskLogFile
         }
@@ -103,7 +102,7 @@ Function Get-LSS_Configuration
     #Variables
     $Path = Split-Path((Get-Module PowerLSS).path)
     $RegBasePath = "HKLM:\SOFTWARE\PowerLSS"
-    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
+    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
 
     if (!(Test-Path $RegBasePath -PathType Container))
     {
@@ -121,43 +120,41 @@ Function Get-LSS_Configuration
         $CurrentConfiguration = (Get-ItemProperty -Path $RegBasePath)."CurrentConfiguration"
         if (!($CurrentConfiguration))
         {
-          Write-Host "No current configuration has been set, returning default values" -ForegroundColor Red
+          if (!($Quiet.IsPresent)) { Write-Host "No current configuration has been set, returning default values" -ForegroundColor Red }
   
           #Define default values
           $LogFile = "$Path\PowerLSS.log"
           $InitialDelay = 60
           $Include = "ps1"
           $Exclude = ""
-          $ValidExitCodes = "0,3010"
-          $Retry = $false
-          $AllowReboot = $false
-          $ContinueIfRebootRequest = $false
-          $ContinueOnFailure = $false
-          $DisableAtTheEnd = $true
-          $ConsoleOutput = $false
-          $Output = $false
-          $CustomLogging = $true
-          $DontRunPreActions = $false
-          $DontRunPostActions = $false
+          $Retry = "False"
+          $AllowReboot = "False"
+          $ContinueIfRebootRequest = "False"
+          $ContinueOnFailure = "False"
+          $DisableAtTheEnd = "True"
+          $ConsoleOutput = "False"
+          $Output = "False"
+          $CustomLogging = "True"
+          $DontRunPreActions = "False"
+          $DontRunPostActions = "False"
           $ScriptsFolder = "PostInstall"
           $ScheduledTaskLogFile = "$Path\Functions\Install-PowerLSS.log"
 
           [PSCustomObject]@{
             "LogFile" = $LogFile
-            "InitialDelay" = $InitialDelay
+            "InitialDelay" = [int]$InitialDelay
             "Include" = $Include
             "Exclude" = $Exclude
-            "ValidExitCodes" = $ValidExitCodes
-            "Retry" = $Retry
-            "AllowReboot" = $AllowReboot
-            "ContinueIfRebootRequest" = $ContinueIfRebootRequest
-            "ContinueOnFailure" = $ContinueOnFailure
-            "DisableAtTheEnd" = $DisableAtTheEnd
-            "ConsoleOutput" = $ConsoleOutput
-            "Output" = $Output
-            "CustomLogging" = $CustomLogging
-            "DontRunPreActions" = $DontRunPreActions
-            "DontRunPostActions" = $DontRunPostActions
+            "Retry" = ($Retry -eq "True")
+            "AllowReboot" = ($AllowReboot -eq "True")
+            "ContinueIfRebootRequest" = ($ContinueIfRebootRequest -eq "True")
+            "ContinueOnFailure" = ($ContinueOnFailure -eq "True")
+            "DisableAtTheEnd" = ($DisableAtTheEnd -eq "True")
+            "ConsoleOutput" = ($ConsoleOutput -eq "True")
+            "Output" = ($Output -eq "True")
+            "CustomLogging" = ($CustomLogging -eq "True")
+            "DontRunPreActions" = ($DontRunPreActions -eq "True")
+            "DontRunPostActions" = ($DontRunPostActions -eq "True")
             "ScriptsFolder" = $ScriptsFolder
             "ScheduledTaskLogFile" = $ScheduledTaskLogFile
           }
@@ -172,7 +169,7 @@ Function Get-LSS_Configuration
         $AllConfigurations = (Get-ChildItem -Path $RegBasePath).PSChildName
         if (!($AllConfigurations))
         {
-          Write-Host "No configuration found" -ForegroundColor Yellow
+          if (!($Quiet.IsPresent)) { Write-Host "No configuration found" -ForegroundColor Yellow }
         }
         else
         {

@@ -2,7 +2,8 @@ Function Copy-LSS_Configuration
 {
   Param (
     [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Source,
-    [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Target
+    [parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][String]$Target,
+    [parameter(Mandatory=$false)][Switch]$Quiet
   )
   
   $ErrorActionPreference = "stop"
@@ -13,14 +14,21 @@ Function Copy-LSS_Configuration
       Import-Module PowerLSS
     }
 
-    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
+    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
     $RegPathSource = "HKLM:\SOFTWARE\PowerLSS\$Source"
     $RegPathTarget = "HKLM:\SOFTWARE\PowerLSS\$Target"
 
     if (!(Test-Path $RegPathSource -PathType Container))
     {
-      Write-Host "Source configuration doesn't exist" -ForegroundColor Red
-      Return
+      if ($Quiet.IsPresent)
+      {
+        Return [PSCustomObject]@{ConfigurationName=$Source;Action="Copy";Result="Not found"}
+      }
+      else
+      {
+        Write-Host "Source configuration doesn't exist" -ForegroundColor Red
+        Return
+      }
     }
 
     if (!(Test-Path $RegPathTarget -PathType Container))
@@ -37,7 +45,14 @@ Function Copy-LSS_Configuration
       }
     }
 
-    Write-Host "Configuration copied successfully" -ForegroundColor Green
+    if ($Quiet.IsPresent)
+    {
+      Return [PSCustomObject]@{ConfigurationName=$Target;Action="Copy";Result="Success"}
+    }
+    else
+    {
+      Write-Host "Configuration copied successfully" -ForegroundColor Green
+    }
   }
   catch
   {

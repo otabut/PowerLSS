@@ -1,5 +1,3 @@
-[![Documentation Status](https://readthedocs.org/projects/powerlss/badge/?version=latest)](http://powerlss.readthedocs.io/en/latest/?badge=latest)
-
 # PowerLSS
 Powershell Launch Startup Scripts
 

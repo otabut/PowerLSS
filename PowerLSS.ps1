@@ -9,12 +9,7 @@
 
 .NOTES
     Author: Olivier TABUT
-        0.4.0 release (03/02/2018)
-    ChangeLog: 
-        Initial version (14/01/2018)
-        0.2.0 release (21/01/2018)
-	0.3.0 release (28/01/2018)
-	0.4.0 release (03/02/2018)
+    0.5.0 release (03/02/2018)
 
 .PARAMETER Retry
     Activate a retry if first attempt to run startup script failed
@@ -39,9 +34,6 @@
 
 .PARAMETER DisableAtTheEnd
     Disable scheduled task when all startup scripts have been successfully processed
-
-.PARAMETER ValidExitCodes
-    List of valid exit codes from startup scripts (comma separated)
 
 .PARAMETER LogFile
     Activate logging to a file and define path to the log file
@@ -88,11 +80,10 @@
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$AllowReboot,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ContinueIfRebootRequest,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ContinueOnFailure,
-    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$Include,
-    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$Exclude,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNull()][String]$Include,
+    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNull()][String]$Exclude,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][Int]$InitialDelay,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$DisableAtTheEnd,
-    [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$ValidExitCodes,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][ValidateNotNullOrEmpty()][String]$LogFile,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$ConsoleOutput,
     [parameter(Mandatory=$false,ParameterSetName="Standard")][Switch]$Output,
@@ -110,10 +101,16 @@
 $ErrorActionPreference = "stop"
 Try
 {
-  #Import PowerLSS helper module
+  #Import PowerLSS module
   If (!(Get-module PowerLSS))
   {
     Import-Module PowerLSS
+  }
+  #Import PowerLSS helper functions
+  $Path = Split-Path((Get-Module PowerLSS).path)
+  ForEach ($Function in Get-ChildItem -Path "$Path\Helpers\*.ps1" -Recurse)
+  {
+    . $Function.FullName
   }
   
   #Check on ParameterSet
@@ -130,52 +127,56 @@ Try
     "Specific"
     {
       #Retrieve configuration
-      $Config = Get-LSS_Configuration -ConfigurationName $ConfigurationName
+      $Config = Get-LSS_Configuration -ConfigurationName $ConfigurationName -Quiet
       #Redefine scope of parameters used by other cmdlets
       $Global:LogFile = $Config.LogFile
-      $Global:ConsoleOutput = $Config.ConsoleOutput
-      $Global:Output = $Config.Output
-      $Global:CustomLogging = $Config.CustomLogging
-      $Retry = $Config.Retry
-      $AllowReboot = $Config.AllowReboot
-      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
-      $ContinueOnFailure = $Config.ContinueOnFailure
-      $Include = $Config.Include
-      $Exclude = $Config.Exclude
+      $Global:ConsoleOutput = ($Config.ConsoleOutput -eq "True")
+      $Global:Output = ($Config.Output -eq "True")
+      $Global:CustomLogging = ($Config.CustomLogging -eq "True")
+      $Retry = ($Config.Retry -eq "True")
+      $AllowReboot = ($Config.AllowReboot -eq "True")
+      $ContinueIfRebootRequest = ($Config.ContinueIfRebootRequest -eq "True")
+      $ContinueOnFailure = ($Config.ContinueOnFailure -eq "True")
+      $Include = "$($Config.Include)"
+      $Exclude = "$($Config.Exclude)"
       $InitialDelay = $Config.InitialDelay
-      $DisableAtTheEnd = $Config.DisableAtTheEnd
-      $ValidExitCodes = $Config.ValidExitCodes
-      $DontRunPreActions = $Config.DontRunPreActions
-      $DontRunPostActions = $Config.DontRunPostActions
-      $ScriptsFolder = $Config.ScriptsFolder
+      $DisableAtTheEnd = ($Config.DisableAtTheEnd -eq "True")
+      $DontRunPreActions = ($Config.DontRunPreActions -eq "True")
+      $DontRunPostActions = ($Config.DontRunPostActions -eq "True")
+      $ScriptsFolder = "$($Config.ScriptsFolder)"
     }
     "Current"
     {
       #Retrieve configuration
-      $Config = Get-LSS_Configuration -Current
+      $Config = Get-LSS_Configuration -Current -Quiet
       #Redefine scope of parameters used by other cmdlets
       $Global:LogFile = $Config.LogFile
-      $Global:ConsoleOutput = $Config.ConsoleOutput
-      $Global:Output = $Config.Output
-      $Global:CustomLogging = $Config.CustomLogging
-      $Retry = $Config.Retry
-      $AllowReboot = $Config.AllowReboot
-      $ContinueIfRebootRequest = $Config.ContinueIfRebootRequest
-      $ContinueOnFailure = $Config.ContinueOnFailure
-      $Include = $Config.Include
-      $Exclude = $Config.Exclude
+      $Global:ConsoleOutput = ($Config.ConsoleOutput -eq "True")
+      $Global:Output = ($Config.Output -eq "True")
+      $Global:CustomLogging = ($Config.CustomLogging -eq "True")
+      $Retry = ($Config.Retry -eq "True")
+      $AllowReboot = ($Config.AllowReboot -eq "True")
+      $ContinueIfRebootRequest = ($Config.ContinueIfRebootRequest -eq "True")
+      $ContinueOnFailure = ($Config.ContinueOnFailure -eq "True")
+      $Include = "$($Config.Include)"
+      $Exclude = "$($Config.Exclude)"
       $InitialDelay = $Config.InitialDelay
-      $DisableAtTheEnd = $Config.DisableAtTheEnd
-      $ValidExitCodes = $Config.ValidExitCodes
-      $DontRunPreActions = $Config.DontRunPreActions
-      $DontRunPostActions = $Config.DontRunPostActions
-      $ScriptsFolder = $Config.ScriptsFolder
+      $DisableAtTheEnd = ($Config.DisableAtTheEnd -eq "True")
+      $DontRunPreActions = ($Config.DontRunPreActions -eq "True")
+      $DontRunPostActions = ($Config.DontRunPostActions -eq "True")
+      $ScriptsFolder = "$($Config.ScriptsFolder)"
     }
   }
 
   #Variables
   $Global:Log = @()
   $Script:ScriptsPath = "$($PSScriptRoot)\$ScriptsFolder"
+
+  #Launch function to handle pre actions
+  if (!($DontRunPreActions.IsPresent))
+  {
+    Start-LSS_PreActions
+  }
 
   #Initialize
   Write-LSS_Log -Step "Initialize" -Status "Information" -Comment "Start of processing."
@@ -186,12 +187,6 @@ Try
     Start-Sleep $InitialDelay
   }
   
-  #Launch function to handle pre actions
-  if (!($DontRunPreActions.IsPresent))
-  {
-    Start-LSS_PreActions
-  }
-
   #Get the list of scripts to execute
   $FirstRun = $true  #Boolean to prevent from computer restart loop
   $ScriptList = Get-ChildItem $ScriptsPath -File | Sort Name
@@ -231,8 +226,9 @@ Try
     else
     {
       $ReturnCode = "0"
-      $ReturnStatus = "Warning"
+      $ReturnStatus = "Skipped"
       $ReturnMessage = "Ignored - file extension not supported"
+      $RebootRequested = $False
     }
 
     Write-LSS_Log -Step "Processing $ScriptBaseName" -Status "Information" -Comment "Return Status : $ReturnStatus"
@@ -326,6 +322,12 @@ Try
           }
         }
       }
+      "Skipped"
+      {
+        Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName was skipped because of unsupported file extension"
+        Move-LSS_File -File $ScriptFullName -Target "$ScriptsPath\Skipped"
+        Write-LSS_Log -Step "Process" -Status "Information" -Comment "$ScriptName has been moved to Skipped folder"
+      }
       Default
       {
         Write-LSS_Log -Step "Process" -Status "Warning" -Comment "$ScriptName provide unsupported return status : $ReturnStatus"
@@ -363,18 +365,24 @@ Try
     #Disable scheduled task if requested
     if ($DisableAtTheEnd.IsPresent)
     {
-      Disable-LSS_ScheduledTask
-      Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
+      if ((Disable-LSS_ScheduledTask).Result)
+      {
+        Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "Scheduled task has been disabled"
+      }
+      else
+      {
+        Write-LSS_Log -Step "Finalize" -Status "Error" -Comment "Cannot disable scheduled task"
+      }
     }
   }
   
+  Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "End of processing"
+
   #Launch function to handle post actions
   if (!($DontRunPostActions.IsPresent))
   {
     Start-LSS_PostActions
   }
-
-  Write-LSS_Log -Step "Finalize" -Status "Information" -Comment "End of processing"
 
   if ($Output.IsPresent)
   {
