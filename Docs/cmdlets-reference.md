@@ -38,7 +38,7 @@ Start-LSS_ScheduledTask
 Stop-LSS_ScheduledTask
 
 
-### Other
+### Helper scripts
 
 Move-LSS_File
 
@@ -50,7 +50,7 @@ Start-LSS_PostActions
 
 Start-LSS_PreActions
 
-Start-LSS_PS1Script
+Start-LSS_PS1Script (+ Start-LSS_<XYZ>Script)
 
 Start-LSS_SuccessActions
 
