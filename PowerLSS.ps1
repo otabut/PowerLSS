@@ -106,6 +106,10 @@ Try
   {
     Import-Module PowerLSS
   }
+  ForEach ($function in Get-ChildItem -Path "$($PSScriptRoot)\Helpers\*.ps1" -Recurse)
+  {
+    . $Function.FullName
+  }
   
   #Check on ParameterSet
   switch ($PSCmdlet.ParameterSetName)
