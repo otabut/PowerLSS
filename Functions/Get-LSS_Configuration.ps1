@@ -18,7 +18,6 @@ Function Get-LSS_Configuration
       $InitialDelay = 60
       $Include = "ps1"
       $Exclude = ""
-      $ValidExitCodes = "0,3010"
       $Retry = "False"
       $AllowReboot = "False"
       $ContinueIfRebootRequest = "False"
@@ -73,7 +72,6 @@ Function Get-LSS_Configuration
           "InitialDelay" = [int]$InitialDelay
           "Include" = $Include
           "Exclude" = $Exclude
-          "ValidExitCodes" = $ValidExitCodes
           "Retry" = ($Retry -eq "True")
           "AllowReboot" = ($AllowReboot -eq "True")
           "ContinueIfRebootRequest" = ($ContinueIfRebootRequest -eq "True")
@@ -104,7 +102,7 @@ Function Get-LSS_Configuration
     #Variables
     $Path = Split-Path((Get-Module PowerLSS).path)
     $RegBasePath = "HKLM:\SOFTWARE\PowerLSS"
-    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
+    $ParameterList = @("LogFile","InitialDelay","Include","Exclude","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")
 
     if (!(Test-Path $RegBasePath -PathType Container))
     {
@@ -129,7 +127,6 @@ Function Get-LSS_Configuration
           $InitialDelay = 60
           $Include = "ps1"
           $Exclude = ""
-          $ValidExitCodes = "0,3010"
           $Retry = "False"
           $AllowReboot = "False"
           $ContinueIfRebootRequest = "False"
@@ -148,7 +145,6 @@ Function Get-LSS_Configuration
             "InitialDelay" = [int]$InitialDelay
             "Include" = $Include
             "Exclude" = $Exclude
-            "ValidExitCodes" = $ValidExitCodes
             "Retry" = ($Retry -eq "True")
             "AllowReboot" = ($AllowReboot -eq "True")
             "ContinueIfRebootRequest" = ($ContinueIfRebootRequest -eq "True")
