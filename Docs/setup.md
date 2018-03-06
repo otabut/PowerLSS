@@ -21,6 +21,10 @@ Copy your script files to the script folder. By default, this is the **PostInsta
 
 Script files will be started in order according to their names. It is recommanded to prefix them with digits, for examples : _02.Run Notepad.ps1_
 
+### Customize code
+
+Put your own code in scripts located in `Helpers` subfolder if needed.
+
 ### Install PowerLSS scheduled task
 
 Use the **Install-PowerLSS** cmdlet to create the PowerLSS scheduled task
