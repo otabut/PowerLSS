@@ -2,7 +2,7 @@ Function Set-LSS_Configuration
 {
   Param (
     [parameter(Mandatory=$true)][String]$ConfigurationName,
-    [parameter(Mandatory=$true)][ValidateSet("LogFile","InitialDelay","Include","Exclude","ValidExitCodes","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")][String]$Parameter,
+    [parameter(Mandatory=$true)][ValidateSet("LogFile","InitialDelay","Include","Exclude","Retry","AllowReboot","ContinueIfRebootRequest","ContinueOnFailure","DisableAtTheEnd","ConsoleOutput","Output","CustomLogging","DontRunPreActions","DontRunPostActions","ScriptsFolder","ScheduledTaskLogFile")][String]$Parameter,
     [parameter(Mandatory=$true)][String]$Value,
     [parameter(Mandatory=$false)][Switch]$Quiet
   )
